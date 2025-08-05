@@ -253,53 +253,63 @@ export const AdvancedCharts: React.FC = () => {
             <CardContent>
               <ChartContainer config={chartConfig} className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
-                  {chartType === 'line' && (
-                    <LineChart data={timeSeriesData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--chart-grid))" />
-                      <XAxis dataKey="date" />
-                      <YAxis />
-                      <ChartTooltip content={<ChartTooltipContent />} />
-                      <ChartLegend content={<ChartLegendContent />} />
-                      <Line type="monotone" dataKey="applications" stroke="var(--color-applications)" strokeWidth={2} />
-                      <Line type="monotone" dataKey="approved" stroke="var(--color-approved)" strokeWidth={2} />
-                      <Line type="monotone" dataKey="rejected" stroke="var(--color-rejected)" strokeWidth={2} />
-                    </LineChart>
-                  )}
-                  {chartType === 'area' && (
-                    <AreaChart data={timeSeriesData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--chart-grid))" />
-                      <XAxis dataKey="date" />
-                      <YAxis />
-                      <ChartTooltip content={<ChartTooltipContent />} />
-                      <ChartLegend content={<ChartLegendContent />} />
-                      <Area type="monotone" dataKey="approved" stackId="1" stroke="var(--color-approved)" fill="var(--color-approved)" fillOpacity={0.7} />
-                      <Area type="monotone" dataKey="rejected" stackId="1" stroke="var(--color-rejected)" fill="var(--color-rejected)" fillOpacity={0.7} />
-                    </AreaChart>
-                  )}
-                  {chartType === 'bar' && (
-                    <BarChart data={timeSeriesData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--chart-grid))" />
-                      <XAxis dataKey="date" />
-                      <YAxis />
-                      <ChartTooltip content={<ChartTooltipContent />} />
-                      <ChartLegend content={<ChartLegendContent />} />
-                      <Bar dataKey="applications" fill="var(--color-applications)" />
-                      <Bar dataKey="approved" fill="var(--color-approved)" />
-                      <Bar dataKey="rejected" fill="var(--color-rejected)" />
-                    </BarChart>
-                  )}
-                  {chartType === 'composed' && (
-                    <ComposedChart data={timeSeriesData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--chart-grid))" />
-                      <XAxis dataKey="date" />
-                      <YAxis yAxisId="left" />
-                      <YAxis yAxisId="right" orientation="right" />
-                      <ChartTooltip content={<ChartTooltipContent />} />
-                      <ChartLegend content={<ChartLegendContent />} />
-                      <Bar yAxisId="left" dataKey="applications" fill="var(--color-applications)" />
-                      <Line yAxisId="right" type="monotone" dataKey="avgScore" stroke="var(--color-avgScore)" strokeWidth={3} />
-                    </ComposedChart>
-                  )}
+                  {(() => {
+                    switch (chartType) {
+                      case 'line':
+                        return (
+                          <LineChart data={timeSeriesData}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--chart-grid))" />
+                            <XAxis dataKey="date" />
+                            <YAxis />
+                            <ChartTooltip content={<ChartTooltipContent />} />
+                            <ChartLegend content={<ChartLegendContent />} />
+                            <Line type="monotone" dataKey="applications" stroke="var(--color-applications)" strokeWidth={2} />
+                            <Line type="monotone" dataKey="approved" stroke="var(--color-approved)" strokeWidth={2} />
+                            <Line type="monotone" dataKey="rejected" stroke="var(--color-rejected)" strokeWidth={2} />
+                          </LineChart>
+                        );
+                      case 'area':
+                        return (
+                          <AreaChart data={timeSeriesData}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--chart-grid))" />
+                            <XAxis dataKey="date" />
+                            <YAxis />
+                            <ChartTooltip content={<ChartTooltipContent />} />
+                            <ChartLegend content={<ChartLegendContent />} />
+                            <Area type="monotone" dataKey="approved" stackId="1" stroke="var(--color-approved)" fill="var(--color-approved)" fillOpacity={0.7} />
+                            <Area type="monotone" dataKey="rejected" stackId="1" stroke="var(--color-rejected)" fill="var(--color-rejected)" fillOpacity={0.7} />
+                          </AreaChart>
+                        );
+                      case 'bar':
+                        return (
+                          <BarChart data={timeSeriesData}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--chart-grid))" />
+                            <XAxis dataKey="date" />
+                            <YAxis />
+                            <ChartTooltip content={<ChartTooltipContent />} />
+                            <ChartLegend content={<ChartLegendContent />} />
+                            <Bar dataKey="applications" fill="var(--color-applications)" />
+                            <Bar dataKey="approved" fill="var(--color-approved)" />
+                            <Bar dataKey="rejected" fill="var(--color-rejected)" />
+                          </BarChart>
+                        );
+                      case 'composed':
+                        return (
+                          <ComposedChart data={timeSeriesData}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--chart-grid))" />
+                            <XAxis dataKey="date" />
+                            <YAxis yAxisId="left" />
+                            <YAxis yAxisId="right" orientation="right" />
+                            <ChartTooltip content={<ChartTooltipContent />} />
+                            <ChartLegend content={<ChartLegendContent />} />
+                            <Bar yAxisId="left" dataKey="applications" fill="var(--color-applications)" />
+                            <Line yAxisId="right" type="monotone" dataKey="avgScore" stroke="var(--color-avgScore)" strokeWidth={3} />
+                          </ComposedChart>
+                        );
+                      default:
+                        return null;
+                    }
+                  })()}
                 </ResponsiveContainer>
               </ChartContainer>
             </CardContent>
