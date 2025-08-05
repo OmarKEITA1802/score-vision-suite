@@ -7,6 +7,7 @@ import { PerformanceChart } from './PerformanceChart';
 import { ClientList } from '../Credit/ClientList';
 import { useApi } from '@/hooks/useApi';
 import { creditService } from '@/services/creditService';
+import { useAuth } from '@/contexts/AuthContext';
 import { 
   Users, 
   TrendingUp, 
@@ -14,10 +15,12 @@ import {
   Clock,
   FileText,
   AlertTriangle,
-  Plus
+  Plus,
+  LogOut
 } from 'lucide-react';
 
 export const AgentDashboard: React.FC = () => {
+  const { logout } = useAuth();
   const { data: summary, loading: summaryLoading } = useApi(
     () => creditService.getScoreSummary(),
     []
@@ -55,10 +58,16 @@ export const AgentDashboard: React.FC = () => {
               Gérez vos demandes de crédit et clients
             </p>
           </div>
-          <Button className="btn-primary">
-            <Plus className="h-4 w-4 mr-2" />
-            Nouvelle demande
-          </Button>
+          <div className="flex space-x-3">
+            <Button className="btn-primary">
+              <Plus className="h-4 w-4 mr-2" />
+              Nouvelle demande
+            </Button>
+            <Button variant="outline" onClick={logout}>
+              <LogOut className="h-4 w-4 mr-2" />
+              Déconnexion
+            </Button>
+          </div>
         </div>
       </div>
 

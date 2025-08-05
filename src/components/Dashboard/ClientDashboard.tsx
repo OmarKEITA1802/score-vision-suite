@@ -4,10 +4,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ScoreChart } from './ScoreChart';
 import { useAuth } from '@/contexts/AuthContext';
-import { TrendingUp, FileText, CreditCard, AlertCircle, Plus } from 'lucide-react';
+import { TrendingUp, FileText, CreditCard, AlertCircle, Plus, LogOut } from 'lucide-react';
 
 export const ClientDashboard: React.FC = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   const myScore = 72; // Simulation du score client
   const lastApplications = [
@@ -19,8 +19,16 @@ export const ClientDashboard: React.FC = () => {
     <div className="space-y-6 p-6">
       {/* Welcome Section */}
       <div className="bg-gradient-to-r from-primary/10 to-success/10 rounded-xl p-6">
-        <h1 className="text-2xl font-bold">Bonjour {user?.firstName} !</h1>
-        <p className="text-muted-foreground mt-1">Voici un aperçu de votre profil crédit</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold">Bonjour {user?.firstName} !</h1>
+            <p className="text-muted-foreground mt-1">Voici un aperçu de votre profil crédit</p>
+          </div>
+          <Button variant="outline" onClick={logout}>
+            <LogOut className="h-4 w-4 mr-2" />
+            Déconnexion
+          </Button>
+        </div>
       </div>
 
       {/* Score principal */}

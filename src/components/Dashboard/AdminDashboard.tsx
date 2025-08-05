@@ -8,6 +8,7 @@ import { ShapChart } from './ShapChart';
 import { ClientList } from '../Credit/ClientList';
 import { useApi } from '@/hooks/useApi';
 import { creditService } from '@/services/creditService';
+import { useAuth } from '@/contexts/AuthContext';
 import { 
   Users, 
   TrendingUp, 
@@ -17,11 +18,13 @@ import {
   Clock,
   Activity,
   BarChart3,
-  Download
+  Download,
+  LogOut
 } from 'lucide-react';
 import dashboardHero from '@/assets/dashboard-hero.jpg';
 
 export const AdminDashboard: React.FC = () => {
+  const { logout } = useAuth();
   const { data: summary, loading: summaryLoading } = useApi(
     () => creditService.getScoreSummary(),
     []
@@ -110,6 +113,10 @@ export const AdminDashboard: React.FC = () => {
               <Button variant="outline" size="sm" className="text-primary-foreground border-primary-foreground/20">
                 <BarChart3 className="h-4 w-4 mr-2" />
                 Analytics avancées
+              </Button>
+              <Button variant="outline" size="sm" className="text-primary-foreground border-primary-foreground/20" onClick={logout}>
+                <LogOut className="h-4 w-4 mr-2" />
+                Déconnexion
               </Button>
             </div>
           </div>
