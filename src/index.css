@@ -229,3 +229,131 @@
     opacity: 1;
   }
 }
+
+/* Mobile-first responsive utilities */
+@layer utilities {
+  /* Mobile touch targets */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px] flex items-center justify-center;
+  }
+
+  /* Mobile-friendly spacing */
+  .mobile-padding {
+    @apply px-4 sm:px-6 lg:px-8;
+  }
+
+  .mobile-margin {
+    @apply mx-4 sm:mx-6 lg:mx-8;
+  }
+
+  /* Responsive text */
+  .responsive-text {
+    @apply text-sm sm:text-base lg:text-lg;
+  }
+
+  /* Mobile-first grid */
+  .mobile-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4;
+  }
+
+  /* Safe area for mobile devices */
+  .safe-area-padding {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+
+  /* Mobile navigation */
+  .mobile-nav-height {
+    height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  }
+
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Mobile-optimized cards */
+  .mobile-card {
+    @apply rounded-lg sm:rounded-xl border border-border bg-card shadow-sm;
+  }
+
+  /* Responsive containers */
+  .container-mobile {
+    @apply w-full max-w-sm mx-auto px-4;
+  }
+
+  .container-tablet {
+    @apply w-full max-w-4xl mx-auto px-6;
+  }
+
+  .container-desktop {
+    @apply w-full max-w-7xl mx-auto px-8;
+  }
+
+  /* Mobile-first animations */
+  .mobile-slide-up {
+    animation: mobileSlideUp 0.3s ease-out;
+  }
+
+  .mobile-fade-in {
+    animation: mobileFadeIn 0.2s ease-out;
+  }
+}
+
+@keyframes mobileSlideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes mobileFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Mobile breakpoint specific styles */
+@media (max-width: 768px) {
+  .fintech-card {
+    @apply shadow-sm rounded-lg;
+    box-shadow: 0 1px 3px hsl(var(--chart-grid));
+  }
+
+  .btn-primary {
+    @apply text-sm py-3 px-4 min-h-[44px];
+  }
+
+  /* Mobile form improvements */
+  input, textarea, select {
+    @apply text-base; /* Prevents zoom on iOS */
+  }
+}
+
+/* Tablet breakpoint */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .fintech-card {
+    @apply shadow-md rounded-xl;
+  }
+}
+
+/* Desktop enhancements */
+@media (min-width: 1024px) {
+  .fintech-card:hover {
+    @apply shadow-lg scale-[1.02] transition-all duration-300;
+  }
+}
