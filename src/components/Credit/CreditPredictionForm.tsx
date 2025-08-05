@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Calculator, Euro, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { creditService, CreditPredictionRequest, CreditPredictionResult } from '@/services/creditService';
 import { useToast } from '@/hooks/use-toast';
@@ -35,71 +38,74 @@ const LEGAL_FORMS = [
   { value: 'ASSOCIATION', label: 'Association' },
 ];
 
-export const CreditPredictionForm: React.FC = () => {
-  const [formData, setFormData] = useState<CreditPredictionRequest>({
-    familyCircumstances: '',
-    activity: '',
-    legalForm: '',
-    isRenewal: 0,
-    revenues: 0,
-    charges: 0,
-    guaranteeEstimatedValue: 0,
-    amountAsked: 0,
-    debt: 0,
-  });
+// Schéma de validation Zod
+const creditFormSchema = z.object({
+  familyCircumstances: z.string().min(1, 'Situation familiale requise'),
+  activity: z.string().min(1, 'Activité professionnelle requise'),
+  legalForm: z.string().min(1, 'Forme juridique requise'),
+  isRenewal: z.number(),
+  revenues: z.number()
+    .min(1, 'Les revenus doivent être supérieurs à 0')
+    .max(1000000, 'Les revenus semblent irréalistes'),
+  charges: z.number()
+    .min(0, 'Les charges ne peuvent pas être négatives')
+    .max(1000000, 'Les charges semblent irréalistes'),
+  guaranteeEstimatedValue: z.number()
+    .min(0, 'La valeur de garantie ne peut pas être négative'),
+  amountAsked: z.number()
+    .min(1, 'Le montant demandé doit être supérieur à 0')
+    .max(10000000, 'Le montant demandé semble irréaliste'),
+  debt: z.number()
+    .min(0, 'La dette ne peut pas être négative')
+    .max(10000000, 'La dette semble irréaliste'),
+}).refine((data) => {
+  // Validation du taux d'endettement
+  const debtRatio = (data.debt / data.revenues) * 100;
+  return debtRatio <= 100;
+}, {
+  message: 'Le taux d\'endettement ne peut pas dépasser 100%',
+  path: ['debt'],
+}).refine((data) => {
+  // Validation du reste à vivre
+  const remainingToLive = data.revenues - data.charges;
+  return remainingToLive >= 0;
+}, {
+  message: 'Les charges ne peuvent pas dépasser les revenus',
+  path: ['charges'],
+}).refine((data) => {
+  // Validation du montant demandé par rapport aux revenus
+  const creditToIncomeRatio = data.amountAsked / (data.revenues * 12);
+  return creditToIncomeRatio <= 10;
+}, {
+  message: 'Le montant demandé ne peut pas dépasser 10 fois vos revenus annuels',
+  path: ['amountAsked'],
+});
 
-  const [isLoading, setIsLoading] = useState(false);
+type CreditFormData = z.infer<typeof creditFormSchema>;
+
+export const CreditPredictionForm: React.FC = () => {
   const [result, setResult] = useState<CreditPredictionResult | null>(null);
-  const [errors, setErrors] = useState<Record<string, string>>({});
   const { toast } = useToast();
 
-  const validateForm = (): boolean => {
-    const newErrors: Record<string, string> = {};
+  const form = useForm<CreditFormData>({
+    resolver: zodResolver(creditFormSchema),
+    defaultValues: {
+      familyCircumstances: '',
+      activity: '',
+      legalForm: '',
+      isRenewal: 0,
+      revenues: 0,
+      charges: 0,
+      guaranteeEstimatedValue: 0,
+      amountAsked: 0,
+      debt: 0,
+    },
+    mode: 'onChange', // Validation en temps réel
+  });
 
-    if (!formData.familyCircumstances) {
-      newErrors.familyCircumstances = 'Situation familiale requise';
-    }
-    if (!formData.activity) {
-      newErrors.activity = 'Activité professionnelle requise';
-    }
-    if (!formData.legalForm) {
-      newErrors.legalForm = 'Forme juridique requise';
-    }
-    if (formData.revenues <= 0) {
-      newErrors.revenues = 'Revenus doivent être supérieurs à 0';
-    }
-    if (formData.charges < 0) {
-      newErrors.charges = 'Charges ne peuvent pas être négatives';
-    }
-    if (formData.guaranteeEstimatedValue < 0) {
-      newErrors.guaranteeEstimatedValue = 'Valeur de garantie ne peut pas être négative';
-    }
-    if (formData.amountAsked <= 0) {
-      newErrors.amountAsked = 'Montant demandé doit être supérieur à 0';
-    }
-    if (formData.debt < 0) {
-      newErrors.debt = 'Dette ne peut pas être négative';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!validateForm()) {
-      toast({
-        variant: 'destructive',
-        title: 'Erreur de validation',
-        description: 'Veuillez corriger les erreurs dans le formulaire.',
-      });
-      return;
-    }
-
-    setIsLoading(true);
+  const onSubmit = async (data: CreditFormData) => {
     try {
-      const predictionResult = await creditService.predictCredit(formData);
+      const predictionResult = await creditService.predictCredit(data as CreditPredictionRequest);
       setResult(predictionResult);
       
       toast({
@@ -112,25 +118,12 @@ export const CreditPredictionForm: React.FC = () => {
         title: 'Erreur',
         description: error.message || 'Erreur lors de la prédiction',
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const handleReset = () => {
-    setFormData({
-      familyCircumstances: '',
-      activity: '',
-      legalForm: '',
-      isRenewal: 0,
-      revenues: 0,
-      charges: 0,
-      guaranteeEstimatedValue: 0,
-      amountAsked: 0,
-      debt: 0,
-    });
+    form.reset();
     setResult(null);
-    setErrors({});
   };
 
   const formatCurrency = (value: number) => {
@@ -140,11 +133,14 @@ export const CreditPredictionForm: React.FC = () => {
     }).format(value);
   };
 
+  const formData = form.watch();
+  const isLoading = form.formState.isSubmitting;
+
   if (result) {
     return (
       <EvaluationResult 
         result={result} 
-        formData={formData}
+        formData={formData as CreditPredictionRequest}
         onReset={handleReset}
       />
     );
@@ -163,258 +159,316 @@ export const CreditPredictionForm: React.FC = () => {
           </CardDescription>
         </CardHeader>
 
-        <form onSubmit={handleSubmit}>
-          <CardContent className="space-y-6">
-            {/* Informations personnelles */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold flex items-center">
-                <span className="w-2 h-2 bg-primary rounded-full mr-3"></span>
-                Informations personnelles
-              </h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="familyCircumstances">Situation familiale *</Label>
-                  <Select
-                    value={formData.familyCircumstances}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, familyCircumstances: value }))}
-                  >
-                    <SelectTrigger className={errors.familyCircumstances ? 'border-destructive' : ''}>
-                      <SelectValue placeholder="Sélectionner..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {FAMILY_CIRCUMSTANCES.map((item) => (
-                        <SelectItem key={item.value} value={item.value}>
-                          {item.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {errors.familyCircumstances && (
-                    <p className="text-sm text-destructive">{errors.familyCircumstances}</p>
-                  )}
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <CardContent className="space-y-6">
+              {/* Informations personnelles */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold flex items-center">
+                  <span className="w-2 h-2 bg-primary rounded-full mr-3"></span>
+                  Informations personnelles
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="familyCircumstances"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Situation familiale *</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Sélectionner..." />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {FAMILY_CIRCUMSTANCES.map((item) => (
+                              <SelectItem key={item.value} value={item.value}>
+                                {item.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="activity"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Activité professionnelle *</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Sélectionner..." />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {ACTIVITIES.map((item) => (
+                              <SelectItem key={item.value} value={item.value}>
+                                {item.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="legalForm"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Forme juridique *</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Sélectionner..." />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {LEGAL_FORMS.map((item) => (
+                              <SelectItem key={item.value} value={item.value}>
+                                {item.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="activity">Activité professionnelle *</Label>
-                  <Select
-                    value={formData.activity}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, activity: value }))}
-                  >
-                    <SelectTrigger className={errors.activity ? 'border-destructive' : ''}>
-                      <SelectValue placeholder="Sélectionner..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {ACTIVITIES.map((item) => (
-                        <SelectItem key={item.value} value={item.value}>
-                          {item.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {errors.activity && (
-                    <p className="text-sm text-destructive">{errors.activity}</p>
+                <FormField
+                  control={form.control}
+                  name="isRenewal"
+                  render={({ field }) => (
+                    <FormItem className="space-y-3">
+                      <FormLabel>Renouvellement de crédit</FormLabel>
+                      <FormControl>
+                        <RadioGroup
+                          onValueChange={(value) => field.onChange(parseInt(value))}
+                          defaultValue={field.value.toString()}
+                          className="flex space-x-6"
+                        >
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="0" id="new" />
+                            <Label htmlFor="new">Nouveau crédit</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="1" id="renewal" />
+                            <Label htmlFor="renewal">Renouvellement</Label>
+                          </div>
+                        </RadioGroup>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
                   )}
-                </div>
+                />
+              </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="legalForm">Forme juridique *</Label>
-                  <Select
-                    value={formData.legalForm}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, legalForm: value }))}
-                  >
-                    <SelectTrigger className={errors.legalForm ? 'border-destructive' : ''}>
-                      <SelectValue placeholder="Sélectionner..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {LEGAL_FORMS.map((item) => (
-                        <SelectItem key={item.value} value={item.value}>
-                          {item.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {errors.legalForm && (
-                    <p className="text-sm text-destructive">{errors.legalForm}</p>
-                  )}
+              <Separator />
+
+              {/* Informations financières */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold flex items-center">
+                  <span className="w-2 h-2 bg-success rounded-full mr-3"></span>
+                  Informations financières
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="revenues"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Revenus mensuels (€) *</FormLabel>
+                        <div className="relative">
+                          <Euro className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <FormControl>
+                            <Input
+                              type="number"
+                              placeholder="3000"
+                              className="pl-10"
+                              {...field}
+                              onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                            />
+                          </FormControl>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="charges"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Charges mensuelles (€)</FormLabel>
+                        <div className="relative">
+                          <Euro className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <FormControl>
+                            <Input
+                              type="number"
+                              placeholder="1200"
+                              className="pl-10"
+                              {...field}
+                              onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                            />
+                          </FormControl>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="guaranteeEstimatedValue"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Valeur garantie estimée (€)</FormLabel>
+                        <div className="relative">
+                          <Euro className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <FormControl>
+                            <Input
+                              type="number"
+                              placeholder="50000"
+                              className="pl-10"
+                              {...field}
+                              onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                            />
+                          </FormControl>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="amountAsked"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Montant demandé (€) *</FormLabel>
+                        <div className="relative">
+                          <Euro className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <FormControl>
+                            <Input
+                              type="number"
+                              placeholder="25000"
+                              className="pl-10"
+                              {...field}
+                              onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                            />
+                          </FormControl>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="debt"
+                    render={({ field }) => (
+                      <FormItem className="md:col-span-2">
+                        <FormLabel>Dette actuelle (€)</FormLabel>
+                        <div className="relative">
+                          <Euro className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <FormControl>
+                            <Input
+                              type="number"
+                              placeholder="5000"
+                              className="pl-10"
+                              {...field}
+                              onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                            />
+                          </FormControl>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
               </div>
 
-              <div className="space-y-3">
-                <Label>Renouvellement de crédit</Label>
-                <RadioGroup
-                  value={formData.isRenewal.toString()}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, isRenewal: parseInt(value) }))}
-                  className="flex space-x-6"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="0" id="new" />
-                    <Label htmlFor="new">Nouveau crédit</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="1" id="renewal" />
-                    <Label htmlFor="renewal">Renouvellement</Label>
-                  </div>
-                </RadioGroup>
-              </div>
-            </div>
-
-            <Separator />
-
-            {/* Informations financières */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold flex items-center">
-                <span className="w-2 h-2 bg-success rounded-full mr-3"></span>
-                Informations financières
-              </h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="revenues">Revenus mensuels (€) *</Label>
-                  <div className="relative">
-                    <Euro className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="revenues"
-                      type="number"
-                      placeholder="3000"
-                      value={formData.revenues || ''}
-                      onChange={(e) => setFormData(prev => ({ ...prev, revenues: parseFloat(e.target.value) || 0 }))}
-                      className={`pl-10 ${errors.revenues ? 'border-destructive' : ''}`}
-                    />
-                  </div>
-                  {errors.revenues && (
-                    <p className="text-sm text-destructive">{errors.revenues}</p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="charges">Charges mensuelles (€)</Label>
-                  <div className="relative">
-                    <Euro className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="charges"
-                      type="number"
-                      placeholder="1200"
-                      value={formData.charges || ''}
-                      onChange={(e) => setFormData(prev => ({ ...prev, charges: parseFloat(e.target.value) || 0 }))}
-                      className={`pl-10 ${errors.charges ? 'border-destructive' : ''}`}
-                    />
-                  </div>
-                  {errors.charges && (
-                    <p className="text-sm text-destructive">{errors.charges}</p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="guaranteeEstimatedValue">Valeur garantie estimée (€)</Label>
-                  <div className="relative">
-                    <Euro className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="guaranteeEstimatedValue"
-                      type="number"
-                      placeholder="50000"
-                      value={formData.guaranteeEstimatedValue || ''}
-                      onChange={(e) => setFormData(prev => ({ ...prev, guaranteeEstimatedValue: parseFloat(e.target.value) || 0 }))}
-                      className={`pl-10 ${errors.guaranteeEstimatedValue ? 'border-destructive' : ''}`}
-                    />
-                  </div>
-                  {errors.guaranteeEstimatedValue && (
-                    <p className="text-sm text-destructive">{errors.guaranteeEstimatedValue}</p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="amountAsked">Montant demandé (€) *</Label>
-                  <div className="relative">
-                    <Euro className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="amountAsked"
-                      type="number"
-                      placeholder="25000"
-                      value={formData.amountAsked || ''}
-                      onChange={(e) => setFormData(prev => ({ ...prev, amountAsked: parseFloat(e.target.value) || 0 }))}
-                      className={`pl-10 ${errors.amountAsked ? 'border-destructive' : ''}`}
-                    />
-                  </div>
-                  {errors.amountAsked && (
-                    <p className="text-sm text-destructive">{errors.amountAsked}</p>
-                  )}
-                </div>
-
-                <div className="space-y-2 md:col-span-2">
-                  <Label htmlFor="debt">Dette actuelle (€)</Label>
-                  <div className="relative">
-                    <Euro className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="debt"
-                      type="number"
-                      placeholder="5000"
-                      value={formData.debt || ''}
-                      onChange={(e) => setFormData(prev => ({ ...prev, debt: parseFloat(e.target.value) || 0 }))}
-                      className={`pl-10 ${errors.debt ? 'border-destructive' : ''}`}
-                    />
-                  </div>
-                  {errors.debt && (
-                    <p className="text-sm text-destructive">{errors.debt}</p>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Calculs automatiques */}
-            {formData.revenues > 0 && (
-              <>
-                <Separator />
-                <div className="bg-muted/30 p-4 rounded-lg space-y-2">
-                  <h4 className="font-medium">Ratios calculés</h4>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <span className="text-muted-foreground">Taux d'endettement:</span>
-                      <span className="ml-2 font-medium">
-                        {((formData.debt / formData.revenues) * 100).toFixed(1)}%
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Reste à vivre:</span>
-                      <span className="ml-2 font-medium">
-                        {formatCurrency(formData.revenues - formData.charges)}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </>
-            )}
-          </CardContent>
-
-          <CardFooter className="flex justify-between">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleReset}
-              disabled={isLoading}
-            >
-              Réinitialiser
-            </Button>
-            
-            <Button
-              type="submit"
-              className="btn-primary"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <div className="flex items-center space-x-2">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-foreground"></div>
-                  <span>Calcul en cours...</span>
-                </div>
-              ) : (
+              {/* Calculs automatiques */}
+              {formData.revenues > 0 && (
                 <>
-                  <Calculator className="w-4 h-4 mr-2" />
-                  Calculer le score
+                  <Separator />
+                  <div className="bg-muted/30 p-4 rounded-lg space-y-2">
+                    <h4 className="font-medium flex items-center">
+                      <CheckCircle2 className="h-4 w-4 mr-2 text-success" />
+                      Ratios calculés
+                    </h4>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span className="text-muted-foreground">Taux d'endettement:</span>
+                        <span className={`ml-2 font-medium ${
+                          ((formData.debt / formData.revenues) * 100) > 33 ? 'text-destructive' : 'text-success'
+                        }`}>
+                          {((formData.debt / formData.revenues) * 100).toFixed(1)}%
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Reste à vivre:</span>
+                        <span className={`ml-2 font-medium ${
+                          (formData.revenues - formData.charges) < 300 ? 'text-destructive' : 'text-success'
+                        }`}>
+                          {formatCurrency(formData.revenues - formData.charges)}
+                        </span>
+                      </div>
+                    </div>
+                    {((formData.debt / formData.revenues) * 100) > 33 && (
+                      <div className="flex items-center text-sm text-destructive mt-2">
+                        <AlertCircle className="h-4 w-4 mr-2" />
+                        Taux d'endettement élevé (recommandé: &lt; 33%)
+                      </div>
+                    )}
+                  </div>
                 </>
               )}
-            </Button>
-          </CardFooter>
-        </form>
+            </CardContent>
+
+            <CardFooter className="flex justify-between">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleReset}
+                disabled={isLoading}
+              >
+                Réinitialiser
+              </Button>
+              
+              <Button
+                type="submit"
+                className="btn-primary"
+                disabled={isLoading || !form.formState.isValid}
+              >
+                {isLoading ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-foreground"></div>
+                    <span>Calcul en cours...</span>
+                  </div>
+                ) : (
+                  <>
+                    <Calculator className="w-4 h-4 mr-2" />
+                    Calculer le score
+                  </>
+                )}
+              </Button>
+            </CardFooter>
+          </form>
+        </Form>
       </Card>
     </div>
   );
