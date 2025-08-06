@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, PieChart, Pie, Cell } from 'recharts';
 import { BarChart3, PieChart as PieChartIcon } from 'lucide-react';
@@ -29,6 +29,22 @@ export const PerformanceChart: React.FC<PerformanceChartProps> = ({
   title,
   description
 }) => {
+  const [screenSize, setScreenSize] = useState({ width: 1024, isMobile: false });
+
+  useEffect(() => {
+    const checkScreenSize = () => {
+      const width = window.innerWidth;
+      setScreenSize({
+        width,
+        isMobile: width < 768
+      });
+    };
+
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
+
   const chartTitle = title || (type === 'bar' ? 'Performance Mensuelle' : 'Répartition des Demandes');
   const chartDescription = description || (type === 'bar' ? 
     'Évolution des approbations, rejets et demandes en attente' : 
@@ -42,11 +58,15 @@ export const PerformanceChart: React.FC<PerformanceChartProps> = ({
         <XAxis 
           dataKey="month" 
           stroke="hsl(var(--muted-foreground))"
-          fontSize={12}
+          fontSize={screenSize.isMobile ? 10 : 12}
+          angle={screenSize.isMobile ? -45 : 0}
+          textAnchor={screenSize.isMobile ? "end" : "middle"}
+          height={screenSize.isMobile ? 60 : 30}
         />
         <YAxis 
           stroke="hsl(var(--muted-foreground))"
-          fontSize={12}
+          fontSize={screenSize.isMobile ? 10 : 12}
+          width={screenSize.isMobile ? 35 : 50}
         />
         <Tooltip
           contentStyle={{
@@ -86,20 +106,28 @@ export const PerformanceChart: React.FC<PerformanceChartProps> = ({
           cx="50%"
           cy="50%"
           labelLine={false}
-          label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-          outerRadius={80}
+          label={({ name, percent }) => {
+            // Ne pas afficher les labels si l'écran est trop petit
+            if (screenSize.isMobile) return "";
+            return `${name}\n${(percent * 100).toFixed(0)}%`;
+          }}
+          outerRadius={screenSize.isMobile ? 60 : screenSize.width < 1024 ? 70 : 85}
+          innerRadius={screenSize.isMobile ? 25 : 30}
           fill="#8884d8"
           dataKey="value"
+          fontSize={screenSize.isMobile ? 10 : 12}
         >
           {pieData.map((entry, index) => (
             <Cell key={`cell-${index}`} fill={entry.color} />
           ))}
         </Pie>
         <Tooltip
+          formatter={(value, name) => [`${value}%`, name]}
           contentStyle={{
-            backgroundColor: 'hsl(var(--card))',
-            border: '1px solid hsl(var(--border))',
-            borderRadius: '8px',
+            backgroundColor: "hsl(var(--card))",
+            border: "1px solid hsl(var(--border))",
+            borderRadius: "8px",
+            fontSize: "14px"
           }}
         />
       </PieChart>

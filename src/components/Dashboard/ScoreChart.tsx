@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } from 'recharts';
 import { TrendingUp } from 'lucide-react';
@@ -27,6 +27,18 @@ export const ScoreChart: React.FC<ScoreChartProps> = ({
   title = 'Évolution des Scores',
   description = 'Score moyen mensuel des demandes de crédit'
 }) => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
+
   const formatTooltip = (value: any, name: string) => {
     if (name === 'averageScore') {
       return [`${value}%`, 'Score moyen'];
@@ -59,13 +71,18 @@ export const ScoreChart: React.FC<ScoreChartProps> = ({
               <XAxis 
                 dataKey="month" 
                 stroke="hsl(var(--muted-foreground))"
-                fontSize={12}
+                fontSize={isMobile ? 10 : 12}
+                interval={isMobile ? 1 : 0}
+                angle={isMobile ? -45 : 0}
+                textAnchor={isMobile ? "end" : "middle"}
+                height={isMobile ? 60 : 30}
               />
               <YAxis 
                 domain={[0, 100]}
                 stroke="hsl(var(--muted-foreground))"
-                fontSize={12}
+                fontSize={isMobile ? 10 : 12}
                 tickFormatter={(value) => `${value}%`}
+                width={isMobile ? 40 : 60}
               />
               <Tooltip
                 formatter={formatTooltip}
