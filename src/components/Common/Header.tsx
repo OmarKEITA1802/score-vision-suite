@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { NotificationCenter } from './NotificationCenter';
 import { ThemeToggle } from './ThemeToggle';
@@ -24,18 +25,17 @@ import {
 export const Header: React.FC = () => {
   const { user, logout } = useAuth();
   const { getUserRole, getRoleConfig, hasPermission } = useRolePermissions();
+  const navigate = useNavigate();
 
   const userRole = getUserRole();
   const roleConfig = getRoleConfig(userRole);
 
   const handleProfileClick = () => {
-    console.log('Navigation vers le profil utilisateur');
-    // TODO: Implémenter la navigation vers la page de profil
+    navigate('/profile');
   };
 
   const handleSettingsClick = () => {
-    console.log('Navigation vers les paramètres');
-    // TODO: Implémenter la navigation vers les paramètres
+    navigate('/settings');
   };
 
   const handleAdminClick = () => {
