@@ -1,14 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { ArrowLeft, Phone, Mail, Calendar, TrendingUp, AlertCircle } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { ArrowLeft, Phone, Mail, Calendar, TrendingUp, AlertCircle, User, CreditCard, MapPin, Briefcase } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Header } from '@/components/Common/Header';
 
 const ClientsList: React.FC = () => {
   const navigate = useNavigate();
+  const [selectedClient, setSelectedClient] = useState<any>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
   // Mock data for recent clients
   const recentClients = [
@@ -20,7 +23,13 @@ const ClientsList: React.FC = () => {
       lastEvaluation: '2024-01-15',
       creditScore: 85,
       status: 'approved',
-      amount: 50000
+      amount: 50000,
+      address: '123 Rue de la Paix, 75001 Paris',
+      profession: 'Ingénieur logiciel',
+      monthlyIncome: 4500,
+      debt: 1200,
+      employmentDuration: '3 ans',
+      familyStatus: 'Célibataire'
     },
     {
       id: 2,
@@ -30,7 +39,13 @@ const ClientsList: React.FC = () => {
       lastEvaluation: '2024-01-14',
       creditScore: 72,
       status: 'approved',
-      amount: 25000
+      amount: 25000,
+      address: '456 Avenue des Champs, 69000 Lyon',
+      profession: 'Commercial',
+      monthlyIncome: 3200,
+      debt: 800,
+      employmentDuration: '5 ans',
+      familyStatus: 'Marié(e)'
     },
     {
       id: 3,
@@ -40,7 +55,13 @@ const ClientsList: React.FC = () => {
       lastEvaluation: '2024-01-13',
       creditScore: 45,
       status: 'rejected',
-      amount: 75000
+      amount: 75000,
+      address: '789 Boulevard Saint-Michel, 13000 Marseille',
+      profession: 'Professeur',
+      monthlyIncome: 2800,
+      debt: 1800,
+      employmentDuration: '2 ans',
+      familyStatus: 'Divorcé(e)'
     },
     {
       id: 4,
@@ -50,7 +71,13 @@ const ClientsList: React.FC = () => {
       lastEvaluation: '2024-01-12',
       creditScore: 68,
       status: 'pending',
-      amount: 30000
+      amount: 30000,
+      address: '321 Rue Victor Hugo, 33000 Bordeaux',
+      profession: 'Comptable',
+      monthlyIncome: 3500,
+      debt: 900,
+      employmentDuration: '4 ans',
+      familyStatus: 'Marié(e)'
     },
     {
       id: 5,
@@ -60,7 +87,13 @@ const ClientsList: React.FC = () => {
       lastEvaluation: '2024-01-11',
       creditScore: 91,
       status: 'approved',
-      amount: 100000
+      amount: 100000,
+      address: '654 Place de la République, 59000 Lille',
+      profession: 'Médecin',
+      monthlyIncome: 7000,
+      debt: 500,
+      employmentDuration: '8 ans',
+      familyStatus: 'Marié(e)'
     }
   ];
 
@@ -93,6 +126,11 @@ const ClientsList: React.FC = () => {
       style: 'currency',
       currency: 'XOF',
     }).format(value);
+  };
+
+  const handleViewDetails = (client: any) => {
+    setSelectedClient(client);
+    setIsDetailModalOpen(true);
   };
 
   const formatDate = (dateString: string) => {
@@ -191,7 +229,12 @@ const ClientsList: React.FC = () => {
 
                   {/* Actions */}
                   <div className="flex space-x-2 pt-2">
-                    <Button variant="outline" size="sm" className="flex-1">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex-1"
+                      onClick={() => handleViewDetails(client)}
+                    >
                       Voir détails
                     </Button>
                     <Button variant="secondary" size="sm" className="flex-1">
@@ -249,6 +292,141 @@ const ClientsList: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Modal de détails */}
+      <Dialog open={isDetailModalOpen} onOpenChange={setIsDetailModalOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2">
+              <User className="h-5 w-5" />
+              <span>Détails du client</span>
+            </DialogTitle>
+            <DialogDescription>
+              Informations complètes sur {selectedClient?.name}
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedClient && (
+            <div className="space-y-6">
+              {/* En-tête du client */}
+              <div className="flex items-center space-x-4 p-4 bg-background/50 rounded-lg">
+                <Avatar className="h-16 w-16">
+                  <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${selectedClient.name}`} />
+                  <AvatarFallback className="bg-primary/10 text-primary font-medium text-lg">
+                    {selectedClient.name.split(' ').map((n: string) => n[0]).join('')}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1">
+                  <h3 className="text-xl font-bold">{selectedClient.name}</h3>
+                  <p className="text-muted-foreground">{selectedClient.profession}</p>
+                  <Badge className={getStatusColor(selectedClient.status)}>
+                    {getStatusText(selectedClient.status)}
+                  </Badge>
+                </div>
+                <div className="text-right">
+                  <p className="text-2xl font-bold text-primary">{selectedClient.creditScore}%</p>
+                  <p className="text-sm text-muted-foreground">Score crédit</p>
+                </div>
+              </div>
+
+              {/* Informations personnelles */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg flex items-center">
+                      <User className="h-4 w-4 mr-2" />
+                      Informations personnelles
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex items-center space-x-2">
+                      <Mail className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm">{selectedClient.email}</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Phone className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm">{selectedClient.phone}</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <MapPin className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm">{selectedClient.address}</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <User className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm">{selectedClient.familyStatus}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg flex items-center">
+                      <Briefcase className="h-4 w-4 mr-2" />
+                      Informations professionnelles
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Profession</p>
+                      <p className="font-medium">{selectedClient.profession}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Revenus mensuels</p>
+                      <p className="font-medium">{formatCurrency(selectedClient.monthlyIncome)}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Ancienneté</p>
+                      <p className="font-medium">{selectedClient.employmentDuration}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Informations financières */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center">
+                    <CreditCard className="h-4 w-4 mr-2" />
+                    Situation financière
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Montant demandé</p>
+                      <p className="text-lg font-bold text-primary">{formatCurrency(selectedClient.amount)}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Dettes actuelles</p>
+                      <p className="text-lg font-bold text-destructive">{formatCurrency(selectedClient.debt)}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Taux d'endettement</p>
+                      <p className="text-lg font-bold">
+                        {((selectedClient.debt / selectedClient.monthlyIncome) * 100).toFixed(1)}%
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Dernière évaluation</p>
+                      <p className="text-lg font-bold">{formatDate(selectedClient.lastEvaluation)}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Actions */}
+              <div className="flex justify-end space-x-2">
+                <Button variant="outline" onClick={() => setIsDetailModalOpen(false)}>
+                  Fermer
+                </Button>
+                <Button>
+                  Nouvelle évaluation
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
