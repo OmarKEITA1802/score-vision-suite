@@ -17,7 +17,7 @@ class ApiService {
 
   constructor() {
     this.client = axios.create({
-      baseURL: process.env.REACT_APP_API_URL || 'http://localhost:8000/api',  // Django default port
+      baseURL: '/api',  // Utilise un chemin relatif pour l'API
       timeout: 10000,
       headers: {
         'Content-Type': 'application/json',
