@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -127,6 +128,7 @@ const DeviceIndicator = () => {
 };
 
 const MobileNavigation = ({ items }: { items: NavItem[] }) => {
+  const navigate = useNavigate();
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
 
   const toggleExpanded = (href: string) => {
@@ -143,13 +145,21 @@ const MobileNavigation = ({ items }: { items: NavItem[] }) => {
     const hasChildren = item.children && item.children.length > 0;
     const isExpanded = expandedItems.has(item.href);
 
+    const handleClick = () => {
+      if (hasChildren) {
+        toggleExpanded(item.href);
+      } else {
+        navigate(item.href);
+      }
+    };
+
     return (
       <div>
         <div
-          className={`flex items-center justify-between w-full p-3 text-left transition-colors hover:bg-muted/50 ${
+          className={`flex items-center justify-between w-full p-3 text-left transition-colors hover:bg-muted/50 cursor-pointer ${
             level > 0 ? 'pl-8' : ''
           }`}
-          onClick={() => hasChildren && toggleExpanded(item.href)}
+          onClick={handleClick}
         >
           <div className="flex items-center gap-3">
             <item.icon className="h-5 w-5" />
@@ -189,6 +199,7 @@ const MobileNavigation = ({ items }: { items: NavItem[] }) => {
 
 const UserMenu = () => {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <DropdownMenu>
@@ -209,11 +220,11 @@ const UserMenu = () => {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={() => navigate('/profile')}>
           <User className="mr-2 h-4 w-4" />
           <span>Profil</span>
         </DropdownMenuItem>
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={() => navigate('/settings')}>
           <Settings className="mr-2 h-4 w-4" />
           <span>Paramètres</span>
         </DropdownMenuItem>
@@ -233,6 +244,7 @@ export const ResponsiveLayout: React.FC<ResponsiveLayoutProps> = ({
   showMobileNav = true 
 }) => {
   const { unreadCount } = useNotifications();
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-background">
@@ -300,17 +312,32 @@ export const ResponsiveLayout: React.FC<ResponsiveLayoutProps> = ({
         {/* Mobile bottom navigation could go here */}
         <div className="fixed bottom-0 left-0 right-0 bg-background border-t p-2">
           <div className="flex justify-center items-center gap-4">
-            <Button variant="ghost" size="sm" className="flex-1 flex flex-col gap-1 h-12">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="flex-1 flex flex-col gap-1 h-12"
+              onClick={() => navigate('/dashboard')}
+            >
               <Home className="h-4 w-4" />
               <span className="text-xs">Accueil</span>
             </Button>
-            <Button variant="ghost" size="sm" className="flex-1 flex flex-col gap-1 h-12">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="flex-1 flex flex-col gap-1 h-12"
+              onClick={() => navigate('/credit-application')}
+            >
               <FileText className="h-4 w-4" />
               <span className="text-xs">Demandes</span>
             </Button>
-            <Button variant="ghost" size="sm" className="flex-1 flex flex-col gap-1 h-12">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="flex-1 flex flex-col gap-1 h-12"
+              onClick={() => navigate('/analytics')}
+            >
               <Users className="h-4 w-4" />
-              <span className="text-xs">Clients</span>
+              <span className="text-xs">Analytics</span>
             </Button>
             <Button variant="ghost" size="sm" className="flex-1 flex flex-col gap-1 h-12 relative">
               <Bell className="h-4 w-4" />
