@@ -18,6 +18,7 @@ import CreditApplication from "./pages/CreditApplication";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import AdvancedAnalytics from "./pages/AdvancedAnalytics";
+import AllApplications from "./pages/AllApplications";
 import ClientsList from "./pages/ClientsList";
 import NotFound from "./pages/NotFound";
 
@@ -79,6 +80,14 @@ const App = () => (
             />
             <Route 
               path="/clients" 
+              element={
+                <ProtectedRoute>
+                  <AllApplications />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/clients-list" 
               element={
                 <ProtectedRoute>
                   <ClientsList />

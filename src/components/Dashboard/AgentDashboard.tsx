@@ -144,8 +144,8 @@ export const AgentDashboard: React.FC = () => {
               className="h-20 flex flex-col items-center justify-center space-y-2"
               onClick={() => navigate('/clients')}
             >
-              <Users className="h-6 w-6" />
-              <span className="text-sm">Clients récents</span>
+              <FileText className="h-6 w-6" />
+              <span className="text-sm">Toutes les demandes</span>
             </Button>
             <Button 
               variant="outline" 
