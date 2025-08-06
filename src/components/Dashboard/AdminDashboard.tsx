@@ -11,8 +11,11 @@ import { ClientList } from '../Credit/ClientList';
 import { useApi } from '@/hooks/useApi';
 import { creditService } from '@/services/creditService';
 import { useAuth } from '@/contexts/AuthContext';
+import { adminService } from '@/services/adminService';
 import { AnimatedContainer } from '@/components/ui/animated-container';
 import { FloatingElement, Shimmer } from '@/components/ui/loading-animations';
+import { useToast } from '@/hooks/use-toast';
+import { useState } from 'react';
 import { 
   Users, 
   TrendingUp, 
@@ -28,6 +31,9 @@ import dashboardHero from '@/assets/dashboard-hero.jpg';
 
 export const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [isExporting, setIsExporting] = useState(false);
+  
   const { data: summary, loading: summaryLoading } = useApi(
     () => creditService.getScoreSummary(),
     []
@@ -37,6 +43,43 @@ export const AdminDashboard: React.FC = () => {
     () => creditService.getApplications(),
     []
   );
+
+  const handleExportReport = async () => {
+    setIsExporting(true);
+    try {
+      const endDate = new Date();
+      const startDate = new Date();
+      startDate.setMonth(endDate.getMonth() - 1); // Dernier mois
+      
+      const result = await adminService.generateComplianceReport({
+        start_date: startDate.toISOString().split('T')[0],
+        end_date: endDate.toISOString().split('T')[0],
+        include_decisions: true,
+        include_manual_overrides: true
+      });
+      
+      // Simuler le téléchargement du rapport
+      const link = document.createElement('a');
+      link.href = result.download_url || '#';
+      link.download = `rapport-conformite-${endDate.toISOString().split('T')[0]}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast({
+        title: "Rapport généré",
+        description: "Le rapport de conformité a été téléchargé avec succès.",
+      });
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de générer le rapport. Veuillez réessayer.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('fr-FR', {
@@ -111,9 +154,15 @@ export const AdminDashboard: React.FC = () => {
               Vue d'ensemble des performances et analyses de crédit
             </p>
             <AnimatedContainer animation="fade-in-up" delay={600} className="flex space-x-4">
-              <Button variant="secondary" size="sm" className="btn-animated hover-glow">
+              <Button 
+                variant="secondary" 
+                size="sm" 
+                className="btn-animated hover-glow"
+                onClick={handleExportReport}
+                disabled={isExporting}
+              >
                 <Download className="h-4 w-4 mr-2" />
-                Exporter rapport
+                {isExporting ? 'Génération...' : 'Exporter rapport'}
               </Button>
               <Button 
                 variant="outline" 
