@@ -246,22 +246,6 @@ export const AgentActions: React.FC<AgentActionsProps> = ({
             </div>
           </TabsContent>
         </Tabs>
-
-        {/* Footer avec informations de sécurité */}
-        <div className="mt-12 p-6 bg-muted/30 rounded-xl border border-muted/40">
-          <div className="flex items-start space-x-4 text-sm text-muted-foreground">
-            <Shield className="h-5 w-5 mt-1 text-primary flex-shrink-0" />
-            <div className="space-y-3">
-              <p className="font-medium text-foreground">🛡️ Bonnes pratiques de sécurité :</p>
-              <ul className="space-y-2 leading-relaxed">
-                <li>• Toutes les actions sont journalisées dans l'audit log</li>
-                <li>• Les décisions manuelles nécessitent une justification</li>
-                <li>• Le modèle de ML ne peut jamais être modifié directement</li>
-                <li>• Respecter les permissions selon votre rôle : <span className="font-medium text-primary">{userRole}</span></li>
-              </ul>
-            </div>
-          </div>
-        </div>
       </CardContent>
     </Card>
   );
