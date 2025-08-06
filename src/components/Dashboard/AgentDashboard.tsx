@@ -147,7 +147,12 @@ export const AgentDashboard: React.FC = () => {
             <Button 
               variant="outline" 
               className="h-20 flex flex-col items-center justify-center space-y-2"
-              onClick={() => navigate('/dashboard')}
+              onClick={() => {
+                const prioritySection = document.getElementById('priority-requests');
+                if (prioritySection) {
+                  prioritySection.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
             >
               <Clock className="h-6 w-6" />
               <span className="text-sm">Demandes urgentes</span>
@@ -165,7 +170,7 @@ export const AgentDashboard: React.FC = () => {
       </Card>
 
       {/* Demandes prioritaires */}
-      <Card className="fintech-card">
+      <Card id="priority-requests" className="fintech-card">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
