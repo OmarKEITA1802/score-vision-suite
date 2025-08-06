@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Separator } from '@/components/ui/separator';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Calculator, Euro, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Calculator, Euro, AlertCircle, CheckCircle2, ArrowLeft } from 'lucide-react';
 import { creditService, CreditPredictionRequest, CreditPredictionResult } from '@/services/creditService';
 import { useToast } from '@/hooks/use-toast';
 import { EvaluationResult } from './EvaluationResult';
@@ -85,6 +85,7 @@ const creditFormSchema = z.object({
 type CreditFormData = z.infer<typeof creditFormSchema>;
 
 export const CreditPredictionForm: React.FC = () => {
+  const navigate = useNavigate();
   const [result, setResult] = useState<CreditPredictionResult | null>(null);
   const [searchParams] = useSearchParams();
   const [isExaminationMode, setIsExaminationMode] = useState(false);
@@ -493,14 +494,25 @@ export const CreditPredictionForm: React.FC = () => {
             </CardContent>
 
             <CardFooter className="flex justify-between">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleReset}
-                disabled={isLoading}
-              >
-                Réinitialiser
-              </Button>
+              <div className="flex space-x-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => navigate('/dashboard')}
+                  disabled={isLoading}
+                >
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Retour
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleReset}
+                  disabled={isLoading}
+                >
+                  Réinitialiser
+                </Button>
+              </div>
               
               <Button
                 type="submit"
