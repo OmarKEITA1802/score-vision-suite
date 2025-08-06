@@ -2,6 +2,7 @@ import React from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Header } from '@/components/Common/Header';
 import { ScoreChart } from './ScoreChart';
 import { PerformanceChart } from './PerformanceChart';
 import { ShapChart } from './ShapChart';
@@ -18,13 +19,11 @@ import {
   Clock,
   Activity,
   BarChart3,
-  Download,
-  LogOut
+  Download
 } from 'lucide-react';
 import dashboardHero from '@/assets/dashboard-hero.jpg';
 
 export const AdminDashboard: React.FC = () => {
-  const { logout } = useAuth();
   const { data: summary, loading: summaryLoading } = useApi(
     () => creditService.getScoreSummary(),
     []
@@ -91,7 +90,9 @@ export const AdminDashboard: React.FC = () => {
   );
 
   return (
-    <div className="space-y-6 p-6">
+    <>
+      <Header />
+      <div className="space-y-6 p-6">
       {/* Hero Section */}
       <div className="relative rounded-xl overflow-hidden">
         <img 
@@ -113,10 +114,6 @@ export const AdminDashboard: React.FC = () => {
               <Button variant="outline" size="sm" className="text-primary-foreground border-primary-foreground/20">
                 <BarChart3 className="h-4 w-4 mr-2" />
                 Analytics avancées
-              </Button>
-              <Button variant="outline" size="sm" className="text-primary-foreground border-primary-foreground/20" onClick={logout}>
-                <LogOut className="h-4 w-4 mr-2" />
-                Déconnexion
               </Button>
             </div>
           </div>
@@ -307,6 +304,7 @@ export const AdminDashboard: React.FC = () => {
           )}
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </>
   );
 };

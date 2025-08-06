@@ -2,6 +2,7 @@ import React from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Header } from '@/components/Common/Header';
 import { ScoreChart } from './ScoreChart';
 import { PerformanceChart } from './PerformanceChart';
 import { ClientList } from '../Credit/ClientList';
@@ -15,12 +16,10 @@ import {
   Clock,
   FileText,
   AlertTriangle,
-  Plus,
-  LogOut
+  Plus
 } from 'lucide-react';
 
 export const AgentDashboard: React.FC = () => {
-  const { logout } = useAuth();
   const { data: summary, loading: summaryLoading } = useApi(
     () => creditService.getScoreSummary(),
     []
@@ -48,7 +47,9 @@ export const AgentDashboard: React.FC = () => {
   const myApprovals = applications?.filter(app => app.status === 'APPROVED' && app.reviewedBy === 'Agent Smith') || [];
 
   return (
-    <div className="space-y-6 p-6">
+    <>
+      <Header />
+      <div className="space-y-6 p-6">
       {/* En-tête Agent */}
       <div className="bg-gradient-to-r from-primary/10 to-success/10 rounded-xl p-6">
         <div className="flex items-center justify-between">
@@ -62,10 +63,6 @@ export const AgentDashboard: React.FC = () => {
             <Button className="btn-primary">
               <Plus className="h-4 w-4 mr-2" />
               Nouvelle demande
-            </Button>
-            <Button variant="outline" onClick={logout}>
-              <LogOut className="h-4 w-4 mr-2" />
-              Déconnexion
             </Button>
           </div>
         </div>
@@ -244,6 +241,7 @@ export const AgentDashboard: React.FC = () => {
           console.log('Client sélectionné:', client);
         }}
       />
-    </div>
+      </div>
+    </>
   );
 };
