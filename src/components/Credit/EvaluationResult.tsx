@@ -7,6 +7,9 @@ import { Separator } from '@/components/ui/separator';
 import { CheckCircle2, XCircle, AlertTriangle, RotateCcw, TrendingUp, TrendingDown, ArrowLeft } from 'lucide-react';
 import { CreditPredictionResult, CreditPredictionRequest } from '@/services/creditService';
 import { useNavigate } from 'react-router-dom';
+import { ApplicationComments } from './ApplicationComments';
+import { DecisionContest } from './DecisionContest';
+import { FileUpload } from './FileUpload';
 
 interface EvaluationResultProps {
   result: CreditPredictionResult;
@@ -295,6 +298,22 @@ export const EvaluationResult: React.FC<EvaluationResultProps> = ({
           )}
         </CardFooter>
       </Card>
+
+      {/* Nouvelles fonctionnalités pour l'agent */}
+      {isExaminationMode && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <ApplicationComments applicationId={applicationId || 'default'} />
+          <DecisionContest 
+            applicationId={applicationId || 'default'}
+            currentDecision={result.decision.toLowerCase() as 'approved' | 'rejected'}
+            currentScore={Math.round(result.probability * 100)}
+          />
+        </div>
+      )}
+      
+      {isExaminationMode && (
+        <FileUpload applicationId={applicationId || 'default'} readonly />
+      )}
     </div>
   );
 };
