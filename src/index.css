@@ -193,7 +193,7 @@
     background: var(--gradient-success);
   }
 
-  /* Animations */
+  /* Advanced Animations & Interactions */
   .animate-fade-in {
     animation: fadeIn 0.6s ease-out;
   }
@@ -208,6 +208,103 @@
 
   .hover-lift {
     @apply transition-transform duration-300 hover:scale-105 hover:shadow-lg;
+  }
+
+  /* Interactive Button Animations */
+  .btn-animated {
+    @apply relative overflow-hidden transition-all duration-300;
+  }
+
+  .btn-animated::before {
+    content: '';
+    @apply absolute inset-0 bg-white/20 transform -translate-x-full transition-transform duration-500 ease-out;
+  }
+
+  .btn-animated:hover::before {
+    @apply translate-x-0;
+  }
+
+  /* Stagger Animation Classes */
+  .stagger-fade-in > *:nth-child(1) { animation-delay: 0.1s; }
+  .stagger-fade-in > *:nth-child(2) { animation-delay: 0.2s; }
+  .stagger-fade-in > *:nth-child(3) { animation-delay: 0.3s; }
+  .stagger-fade-in > *:nth-child(4) { animation-delay: 0.4s; }
+  .stagger-fade-in > *:nth-child(5) { animation-delay: 0.5s; }
+  .stagger-fade-in > *:nth-child(6) { animation-delay: 0.6s; }
+
+  /* Hover Glow Effect */
+  .hover-glow {
+    @apply transition-all duration-300;
+  }
+
+  .hover-glow:hover {
+    @apply shadow-lg;
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.4), 0 0 40px hsl(var(--primary) / 0.2);
+  }
+
+  /* Pulse Border Animation */
+  .pulse-border {
+    @apply relative;
+  }
+
+  .pulse-border::before {
+    content: '';
+    @apply absolute inset-0 rounded-lg border-2 border-primary/50 animate-ping;
+  }
+
+  /* Text Shimmer Effect */
+  .text-shimmer {
+    background: linear-gradient(90deg, 
+      hsl(var(--foreground)), 
+      hsl(var(--primary)), 
+      hsl(var(--foreground))
+    );
+    background-size: 200% 100%;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shimmer 2s ease-in-out infinite;
+  }
+
+  /* Loading Skeleton */
+  .skeleton-shimmer {
+    @apply relative overflow-hidden;
+  }
+
+  .skeleton-shimmer::before {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer;
+  }
+
+  /* Entrance Animations */
+  .entrance-fade { @apply animate-fade-in; }
+  .entrance-slide-up { @apply animate-fade-in-up; }
+  .entrance-slide-down { @apply animate-fade-in-down; }
+  .entrance-slide-left { @apply animate-fade-in-left; }
+  .entrance-slide-right { @apply animate-fade-in-right; }
+  .entrance-scale { @apply animate-scale-in; }
+  .entrance-bounce { @apply animate-scale-in-bounce; }
+  .entrance-rotate { @apply animate-rotate-in; }
+
+  /* Interactive Hover States */
+  .interactive-card {
+    @apply transition-all duration-300 cursor-pointer;
+  }
+
+  .interactive-card:hover {
+    @apply transform scale-105 shadow-xl;
+    box-shadow: 0 10px 30px hsl(var(--primary) / 0.2);
+  }
+
+  /* Progress Bar Animation */
+  .progress-animated {
+    @apply relative overflow-hidden;
+  }
+
+  .progress-animated::before {
+    content: '';
+    @apply absolute inset-y-0 left-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer;
+    width: 50%;
   }
 }
 

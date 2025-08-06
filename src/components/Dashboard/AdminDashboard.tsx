@@ -10,6 +10,8 @@ import { ClientList } from '../Credit/ClientList';
 import { useApi } from '@/hooks/useApi';
 import { creditService } from '@/services/creditService';
 import { useAuth } from '@/contexts/AuthContext';
+import { AnimatedContainer } from '@/components/ui/animated-container';
+import { FloatingElement, Shimmer } from '@/components/ui/loading-animations';
 import { 
   Users, 
   TrendingUp, 
@@ -94,66 +96,74 @@ export const AdminDashboard: React.FC = () => {
       <Header />
       <div className="space-y-6 p-6">
       {/* Hero Section */}
-      <div className="relative rounded-xl overflow-hidden">
+      <AnimatedContainer animation="fade-in-down" className="relative rounded-xl overflow-hidden">
         <img 
           src={dashboardHero} 
           alt="Credit Scoring Dashboard" 
           className="w-full h-48 object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-primary/90 to-primary/70 flex items-center">
-          <div className="p-8 text-primary-foreground">
-            <h1 className="text-3xl font-bold mb-2">Dashboard Administrateur</h1>
+          <AnimatedContainer animation="fade-in-left" delay={300} className="p-8 text-primary-foreground">
+            <h1 className="text-3xl font-bold mb-2 text-shimmer">Dashboard Administrateur</h1>
             <p className="text-primary-foreground/90 mb-4">
               Vue d'ensemble des performances et analyses de crédit
             </p>
-            <div className="flex space-x-4">
-              <Button variant="secondary" size="sm">
+            <AnimatedContainer animation="fade-in-up" delay={600} className="flex space-x-4">
+              <Button variant="secondary" size="sm" className="btn-animated hover-glow">
                 <Download className="h-4 w-4 mr-2" />
                 Exporter rapport
               </Button>
-              <Button variant="outline" size="sm" className="text-primary-foreground border-primary-foreground/20">
+              <Button variant="outline" size="sm" className="text-primary-foreground border-primary-foreground/20 btn-animated">
                 <BarChart3 className="h-4 w-4 mr-2" />
                 Analytics avancées
               </Button>
-            </div>
-          </div>
+            </AnimatedContainer>
+          </AnimatedContainer>
         </div>
-      </div>
+      </AnimatedContainer>
 
       {/* Métriques principales */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard
-          title="Total Demandes"
-          value={summary?.totalApplications.toString() || '0'}
-          change="+12%"
-          icon={Users}
-          loading={summaryLoading}
-        />
-        <StatCard
-          title="Taux d'Approbation"
-          value={summary ? formatPercentage(summary.approvalRate) : '0%'}
-          change="+3.2%"
-          icon={CheckCircle}
-          color="success"
-          loading={summaryLoading}
-        />
-        <StatCard
-          title="Score Moyen"
-          value={summary ? formatPercentage(summary.averageScore) : '0%'}
-          change="+5.1%"
-          icon={TrendingUp}
-          color="primary"
-          loading={summaryLoading}
-        />
-        <StatCard
-          title="Volume Total"
-          value={summary ? formatCurrency(summary.totalAmount) : '0€'}
-          change="+8.7%"
-          icon={DollarSign}
-          color="success"
-          loading={summaryLoading}
-        />
-      </div>
+      <AnimatedContainer stagger className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <AnimatedContainer animation="slide-up" delay={100}>
+          <StatCard
+            title="Total Demandes"
+            value={summary?.totalApplications.toString() || '0'}
+            change="+12%"
+            icon={Users}
+            loading={summaryLoading}
+          />
+        </AnimatedContainer>
+        <AnimatedContainer animation="slide-up" delay={200}>
+          <StatCard
+            title="Taux d'Approbation"
+            value={summary ? formatPercentage(summary.approvalRate) : '0%'}
+            change="+3.2%"
+            icon={CheckCircle}
+            color="success"
+            loading={summaryLoading}
+          />
+        </AnimatedContainer>
+        <AnimatedContainer animation="slide-up" delay={300}>
+          <StatCard
+            title="Score Moyen"
+            value={summary ? formatPercentage(summary.averageScore) : '0%'}
+            change="+5.1%"
+            icon={TrendingUp}
+            color="primary"
+            loading={summaryLoading}
+          />
+        </AnimatedContainer>
+        <AnimatedContainer animation="slide-up" delay={400}>
+          <StatCard
+            title="Volume Total"
+            value={summary ? formatCurrency(summary.totalAmount) : '0€'}
+            change="+8.7%"
+            icon={DollarSign}
+            color="success"
+            loading={summaryLoading}
+          />
+        </AnimatedContainer>
+      </AnimatedContainer>
 
       {/* Répartition des statuts */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
