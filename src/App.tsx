@@ -18,6 +18,7 @@ import CreditApplication from "./pages/CreditApplication";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import AdvancedAnalytics from "./pages/AdvancedAnalytics";
+import ClientsList from "./pages/ClientsList";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -73,6 +74,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <AdvancedAnalytics />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/clients" 
+              element={
+                <ProtectedRoute>
+                  <ClientsList />
                 </ProtectedRoute>
               } 
             />
