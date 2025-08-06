@@ -6,6 +6,7 @@ import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { CheckCircle2, XCircle, AlertTriangle, RotateCcw, TrendingUp, TrendingDown, ArrowLeft } from 'lucide-react';
 import { CreditPredictionResult, CreditPredictionRequest } from '@/services/creditService';
+import { useNavigate } from 'react-router-dom';
 
 interface EvaluationResultProps {
   result: CreditPredictionResult;
@@ -22,6 +23,7 @@ export const EvaluationResult: React.FC<EvaluationResultProps> = ({
   isExaminationMode = false,
   applicationId,
 }) => {
+  const navigate = useNavigate();
   const scorePercentage = Math.round(result.probability * 100);
   const isApproved = result.decision === 'APPROVED';
 
@@ -269,10 +271,10 @@ export const EvaluationResult: React.FC<EvaluationResultProps> = ({
           <div className="flex space-x-2">
             <Button
               variant="outline"
-              onClick={onReset}
+              onClick={isExaminationMode ? () => navigate('/dashboard') : onReset}
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Retour
+              {isExaminationMode ? 'Retour au tableau de bord' : 'Retour'}
             </Button>
             <Button
               variant="outline"
