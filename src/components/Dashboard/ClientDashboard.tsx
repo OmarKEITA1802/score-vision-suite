@@ -1,20 +1,56 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/Common/Header';
 import { ScoreChart } from './ScoreChart';
 import { useAuth } from '@/contexts/AuthContext';
+import { ClientCreditForm } from '@/components/Credit/ClientCreditForm';
 import { TrendingUp, FileText, CreditCard, AlertCircle, Plus } from 'lucide-react';
 
 export const ClientDashboard: React.FC = () => {
   const { user } = useAuth();
+  const [hasSubmittedData, setHasSubmittedData] = useState(false);
+  const [userScore, setUserScore] = useState<number | null>(null);
 
-  const myScore = 72; // Simulation du score client
   const lastApplications = [
     { date: '2024-01-15', amount: 25000, status: 'APPROVED', score: 85 },
     { date: '2023-11-20', amount: 15000, status: 'APPROVED', score: 78 }
   ];
+
+  // Si l'utilisateur n'a pas encore soumis ses données, afficher le formulaire
+  if (!hasSubmittedData) {
+    return (
+      <>
+        <Header />
+        <div className="space-y-6 p-6">
+          <div className="bg-gradient-to-r from-primary/10 to-success/10 rounded-xl p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-2xl font-bold">Bonjour {user?.firstName} !</h1>
+                <p className="text-muted-foreground mt-1">Entrez vos informations pour calculer votre score crédit</p>
+              </div>
+            </div>
+          </div>
+          
+          <Card className="fintech-card-premium">
+            <CardHeader className="text-center">
+              <CardTitle className="text-xl">Évaluation de votre solvabilité</CardTitle>
+              <CardDescription>
+                Remplissez le formulaire ci-dessous pour obtenir votre score crédit personnalisé
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ClientCreditForm onScoreCalculated={(score) => {
+                setUserScore(score);
+                setHasSubmittedData(true);
+              }} />
+            </CardContent>
+          </Card>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
@@ -50,13 +86,13 @@ export const ClientDashboard: React.FC = () => {
                     stroke="hsl(var(--primary))" 
                     strokeWidth="8" 
                     fill="none"
-                    strokeDasharray={`${myScore * 2.51} 251`}
+                    strokeDasharray={`${(userScore || 0) * 2.51} 251`}
                     className="transition-all duration-1000"
                   />
                 </svg>
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="text-center">
-                    <div className="text-3xl font-bold text-primary">{myScore}%</div>
+                    <div className="text-3xl font-bold text-primary">{userScore || 0}%</div>
                     <div className="text-sm text-muted-foreground">Score</div>
                   </div>
                 </div>
@@ -96,9 +132,15 @@ export const ClientDashboard: React.FC = () => {
             </CardContent>
           </Card>
 
-          <Button className="w-full btn-primary">
+           <Button 
+            className="w-full btn-primary"
+            onClick={() => {
+              setHasSubmittedData(false);
+              setUserScore(null);
+            }}
+          >
             <Plus className="h-4 w-4 mr-2" />
-            Nouvelle demande
+            Nouvelle évaluation
           </Button>
         </div>
       </div>
