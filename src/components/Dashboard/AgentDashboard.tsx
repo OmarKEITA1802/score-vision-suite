@@ -228,10 +228,22 @@ export const AgentDashboard: React.FC = () => {
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Button size="sm" variant="outline">
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => navigate(`/credit-application?applicationId=${app.id}`)}
+                    >
                       Examiner
                     </Button>
-                    <Button size="sm" className="btn-success">
+                    <Button 
+                      size="sm" 
+                      className="btn-success"
+                      onClick={() => {
+                        // Ici vous pouvez ajouter la logique d'approbation
+                        console.log(`Approuver la demande ${app.id} de ${app.clientName}`);
+                        // Exemple: creditService.approveApplication(app.id)
+                      }}
+                    >
                       Approuver
                     </Button>
                   </div>
