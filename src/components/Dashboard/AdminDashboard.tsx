@@ -41,7 +41,7 @@ export const AdminDashboard: React.FC = () => {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
-      currency: 'EUR',
+      currency: 'XOF',
       notation: 'compact',
       maximumFractionDigits: 1
     }).format(amount);
@@ -163,7 +163,7 @@ export const AdminDashboard: React.FC = () => {
         <AnimatedContainer animation="slide-up" delay={400}>
           <StatCard
             title="Volume Total"
-            value={summary ? formatCurrency(summary.totalAmount) : '0€'}
+            value={summary ? formatCurrency(summary.totalAmount) : '0 CFA'}
             change="+8.7%"
             icon={DollarSign}
             color="success"

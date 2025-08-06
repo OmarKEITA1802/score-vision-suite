@@ -114,7 +114,7 @@ export const AdvancedCharts: React.FC = () => {
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
-      currency: 'EUR',
+      currency: 'XOF',
       minimumFractionDigits: 0,
     }).format(value);
   };

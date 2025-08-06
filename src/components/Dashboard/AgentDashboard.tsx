@@ -33,7 +33,7 @@ export const AgentDashboard: React.FC = () => {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
-      currency: 'EUR',
+      currency: 'XOF',
       notation: 'compact',
       maximumFractionDigits: 1
     }).format(amount);

@@ -129,7 +129,7 @@ export const CreditPredictionForm: React.FC = () => {
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
-      currency: 'EUR',
+      currency: 'XOF',
     }).format(value);
   };
 
@@ -289,7 +289,7 @@ export const CreditPredictionForm: React.FC = () => {
                     name="revenues"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Revenus mensuels (€) *</FormLabel>
+                        <FormLabel>Revenus mensuels (CFA) *</FormLabel>
                         <div className="relative">
                           <Euro className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                           <FormControl>
@@ -312,7 +312,7 @@ export const CreditPredictionForm: React.FC = () => {
                     name="charges"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Charges mensuelles (€)</FormLabel>
+                        <FormLabel>Charges mensuelles (CFA)</FormLabel>
                         <div className="relative">
                           <Euro className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                           <FormControl>
@@ -335,7 +335,7 @@ export const CreditPredictionForm: React.FC = () => {
                     name="guaranteeEstimatedValue"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Valeur garantie estimée (€)</FormLabel>
+                        <FormLabel>Valeur garantie estimée (CFA)</FormLabel>
                         <div className="relative">
                           <Euro className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                           <FormControl>
@@ -358,7 +358,7 @@ export const CreditPredictionForm: React.FC = () => {
                     name="amountAsked"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Montant demandé (€) *</FormLabel>
+                        <FormLabel>Montant demandé (CFA) *</FormLabel>
                         <div className="relative">
                           <Euro className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                           <FormControl>
@@ -381,7 +381,7 @@ export const CreditPredictionForm: React.FC = () => {
                     name="debt"
                     render={({ field }) => (
                       <FormItem className="md:col-span-2">
-                        <FormLabel>Dette actuelle (€)</FormLabel>
+                        <FormLabel>Dette actuelle (CFA)</FormLabel>
                         <div className="relative">
                           <Euro className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                           <FormControl>
