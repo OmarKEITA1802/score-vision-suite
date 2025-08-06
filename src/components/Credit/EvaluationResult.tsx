@@ -238,32 +238,175 @@ export const EvaluationResult: React.FC<EvaluationResultProps> = ({
         </Card>
       </div>
 
-      {/* Résumé des données */}
+      {/* Détails complets de la demande client */}
       <Card className="fintech-card">
         <CardHeader>
-          <CardTitle>Résumé de la demande</CardTitle>
+          <CardTitle className="flex items-center">
+            <CheckCircle2 className="h-5 w-5 mr-2 text-primary" />
+            Détails de la demande du client
+          </CardTitle>
+          <CardDescription>
+            Informations complètes fournies par le demandeur
+          </CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-            <div>
-              <span className="text-muted-foreground block">Montant demandé</span>
-              <span className="font-bold">{formatCurrency(formData.amountAsked)}</span>
+        <CardContent className="space-y-6">
+          {/* Informations financières */}
+          <div>
+            <h3 className="font-semibold text-lg mb-4 text-primary">💰 Informations Financières</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="p-4 bg-muted/30 rounded-lg">
+                <span className="text-muted-foreground block text-sm">Montant demandé</span>
+                <span className="font-bold text-xl text-primary">{formatCurrency(formData.amountAsked)}</span>
+              </div>
+              <div className="p-4 bg-muted/30 rounded-lg">
+                <span className="text-muted-foreground block text-sm">Revenus mensuels</span>
+                <span className="font-bold text-xl text-success">{formatCurrency(formData.revenues)}</span>
+              </div>
+              <div className="p-4 bg-muted/30 rounded-lg">
+                <span className="text-muted-foreground block text-sm">Charges mensuelles</span>
+                <span className="font-bold text-xl text-warning">{formatCurrency(formData.charges)}</span>
+              </div>
+              <div className="p-4 bg-muted/30 rounded-lg">
+                <span className="text-muted-foreground block text-sm">Dettes actuelles</span>
+                <span className="font-bold text-xl text-destructive">{formatCurrency(formData.debt)}</span>
+              </div>
+              <div className="p-4 bg-muted/30 rounded-lg">
+                <span className="text-muted-foreground block text-sm">Valeur de la garantie</span>
+                <span className="font-bold text-xl text-info">{formatCurrency(formData.guaranteeEstimatedValue)}</span>
+              </div>
+              <div className="p-4 bg-muted/30 rounded-lg">
+                <span className="text-muted-foreground block text-sm">Type de crédit</span>
+                <span className="font-bold text-lg">
+                  {formData.isRenewal ? '🔄 Renouvellement' : '🆕 Nouveau crédit'}
+                </span>
+              </div>
             </div>
-            <div>
-              <span className="text-muted-foreground block">Revenus mensuels</span>
-              <span className="font-bold">{formatCurrency(formData.revenues)}</span>
+          </div>
+
+          <Separator />
+
+          {/* Informations personnelles et professionnelles */}
+          <div>
+            <h3 className="font-semibold text-lg mb-4 text-primary">👤 Profil du Demandeur</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="p-4 bg-background/50 rounded-lg border">
+                <span className="text-muted-foreground block text-sm">Situation familiale</span>
+                <span className="font-semibold text-lg">
+                  {formData.familyCircumstances === 'MARRIED_WITH_CHILDREN' && '👨‍👩‍👧‍👦 Marié avec enfants'}
+                  {formData.familyCircumstances === 'MARRIED_WITHOUT_CHILDREN' && '👨‍👩 Marié sans enfants'}
+                  {formData.familyCircumstances === 'SINGLE' && '👤 Célibataire'}
+                  {formData.familyCircumstances === 'DIVORCED' && '💔 Divorcé(e)'}
+                  {formData.familyCircumstances === 'WIDOWED' && '🖤 Veuf/Veuve'}
+                </span>
+              </div>
+              <div className="p-4 bg-background/50 rounded-lg border">
+                <span className="text-muted-foreground block text-sm">Activité professionnelle</span>
+                <span className="font-semibold text-lg">
+                  {formData.activity === 'EMPLOYEE' && '👔 Salarié'}
+                  {formData.activity === 'SELF_EMPLOYED' && '👨‍💼 Indépendant'}
+                  {formData.activity === 'RETIRED' && '🏖️ Retraité'}
+                  {formData.activity === 'UNEMPLOYED' && '🔍 Sans emploi'}
+                  {formData.activity === 'STUDENT' && '🎓 Étudiant'}
+                </span>
+              </div>
+              <div className="p-4 bg-background/50 rounded-lg border">
+                <span className="text-muted-foreground block text-sm">Forme juridique</span>
+                <span className="font-semibold text-lg">
+                  {formData.legalForm === 'INDIVIDUAL' && '👤 Particulier'}
+                  {formData.legalForm === 'COMPANY' && '🏢 Entreprise'}
+                  {formData.legalForm === 'ASSOCIATION' && '🤝 Association'}
+                </span>
+              </div>
             </div>
-            <div>
-              <span className="text-muted-foreground block">Taux d'endettement</span>
-              <span className="font-bold">
-                {((formData.debt / formData.revenues) * 100).toFixed(1)}%
-              </span>
+          </div>
+
+          <Separator />
+
+          {/* Analyse financière détaillée */}
+          <div>
+            <h3 className="font-semibold text-lg mb-4 text-primary">📊 Analyse Financière</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="p-3 bg-background/50 rounded-lg border">
+                <span className="text-muted-foreground block text-sm">Revenus nets</span>
+                <span className="font-semibold text-lg text-success">
+                  {formatCurrency(formData.revenues - formData.charges)}
+                </span>
+                <span className="text-xs text-muted-foreground">Revenus - Charges</span>
+              </div>
+              <div className="p-3 bg-background/50 rounded-lg border">
+                <span className="text-muted-foreground block text-sm">Taux d'endettement</span>
+                <span className={`font-semibold text-lg ${
+                  ((formData.debt / formData.revenues) * 100) > 33 ? 'text-destructive' : 'text-success'
+                }`}>
+                  {((formData.debt / formData.revenues) * 100).toFixed(1)}%
+                </span>
+                <span className="text-xs text-muted-foreground">Dettes / Revenus</span>
+              </div>
+              <div className="p-3 bg-background/50 rounded-lg border">
+                <span className="text-muted-foreground block text-sm">Ratio garantie</span>
+                <span className={`font-semibold text-lg ${
+                  (formData.guaranteeEstimatedValue / formData.amountAsked) > 1 ? 'text-success' : 'text-warning'
+                }`}>
+                  {((formData.guaranteeEstimatedValue / formData.amountAsked) * 100).toFixed(0)}%
+                </span>
+                <span className="text-xs text-muted-foreground">Garantie / Montant</span>
+              </div>
+              <div className="p-3 bg-background/50 rounded-lg border">
+                <span className="text-muted-foreground block text-sm">Capacité théorique</span>
+                <span className={`font-semibold text-lg ${
+                  ((formData.amountAsked / (formData.revenues - formData.charges)) * 100) > 300 ? 'text-destructive' : 'text-success'
+                }`}>
+                  {((formData.amountAsked / (formData.revenues - formData.charges))).toFixed(1)} mois
+                </span>
+                <span className="text-xs text-muted-foreground">Montant / Revenus nets</span>
+              </div>
             </div>
-            <div>
-              <span className="text-muted-foreground block">Type</span>
-              <span className="font-bold">
-                {formData.isRenewal ? 'Renouvellement' : 'Nouveau crédit'}
-              </span>
+          </div>
+
+          {/* Évaluation des risques */}
+          <div className="mt-6 p-4 bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg border border-primary/20">
+            <h4 className="font-semibold text-primary mb-3">🎯 Évaluation des Risques</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <h5 className="font-medium text-success mb-2">✅ Points Positifs</h5>
+                <ul className="space-y-1 text-sm">
+                  {(formData.revenues - formData.charges) > 0 && (
+                    <li>• Revenus nets positifs ({formatCurrency(formData.revenues - formData.charges)})</li>
+                  )}
+                  {(formData.guaranteeEstimatedValue / formData.amountAsked) > 1 && (
+                    <li>• Garantie supérieure au montant demandé</li>
+                  )}
+                  {((formData.debt / formData.revenues) * 100) < 33 && (
+                    <li>• Taux d'endettement acceptable (&lt; 33%)</li>
+                  )}
+                  {formData.isRenewal === 1 && (
+                    <li>• Client existant (renouvellement)</li>
+                  )}
+                  {formData.activity === 'EMPLOYEE' && (
+                    <li>• Situation professionnelle stable (salarié)</li>
+                  )}
+                </ul>
+              </div>
+              <div>
+                <h5 className="font-medium text-destructive mb-2">⚠️ Points d'Attention</h5>
+                <ul className="space-y-1 text-sm">
+                  {(formData.revenues - formData.charges) <= 0 && (
+                    <li>• Revenus nets insuffisants ou négatifs</li>
+                  )}
+                  {(formData.guaranteeEstimatedValue / formData.amountAsked) < 1 && (
+                    <li>• Garantie inférieure au montant demandé</li>
+                  )}
+                  {((formData.debt / formData.revenues) * 100) > 33 && (
+                    <li>• Taux d'endettement élevé (&gt; 33%)</li>
+                  )}
+                  {formData.activity === 'UNEMPLOYED' && (
+                    <li>• Situation professionnelle précaire</li>
+                  )}
+                  {formData.activity === 'SELF_EMPLOYED' && (
+                    <li>• Revenus variables (indépendant)</li>
+                  )}
+                </ul>
+              </div>
             </div>
           </div>
         </CardContent>
