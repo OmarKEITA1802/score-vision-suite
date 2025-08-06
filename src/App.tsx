@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { NotificationProvider } from "@/contexts/NotificationContext";
 import { RolePermissionProvider } from "@/contexts/RolePermissionContext";
+import { ThemeProvider } from "@/components/Common/ThemeProvider";
 import { ProtectedRoute } from "@/components/Common/ProtectedRoute";
 import { RoleProtectedRoute } from "@/components/Common/RoleProtectedRoute";
 
@@ -20,13 +21,14 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <RolePermissionProvider>
-        <NotificationProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
+    <ThemeProvider defaultTheme="system" storageKey="fintech-app-theme">
+      <AuthProvider>
+        <RolePermissionProvider>
+          <NotificationProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
@@ -49,11 +51,12 @@ const App = () => (
             />
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </BrowserRouter>
-          </TooltipProvider>
-        </NotificationProvider>
-      </RolePermissionProvider>
-    </AuthProvider>
+         </BrowserRouter>
+            </TooltipProvider>
+          </NotificationProvider>
+        </RolePermissionProvider>
+      </AuthProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 

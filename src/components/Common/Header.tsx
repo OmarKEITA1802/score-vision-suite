@@ -1,6 +1,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { NotificationCenter } from './NotificationCenter';
+import { ThemeToggle } from './ThemeToggle';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRolePermissions } from '@/contexts/RolePermissionContext';
 import { Badge } from '@/components/ui/badge';
@@ -52,6 +53,9 @@ export const Header: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-4">
+          {/* Toggle de thème */}
+          <ThemeToggle />
+          
           {/* Centre de notifications */}
           <NotificationCenter />
 
