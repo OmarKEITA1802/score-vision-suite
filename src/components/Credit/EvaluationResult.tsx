@@ -4,7 +4,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
-import { CheckCircle2, XCircle, AlertTriangle, RotateCcw, TrendingUp, TrendingDown } from 'lucide-react';
+import { CheckCircle2, XCircle, AlertTriangle, RotateCcw, TrendingUp, TrendingDown, ArrowLeft } from 'lucide-react';
 import { CreditPredictionResult, CreditPredictionRequest } from '@/services/creditService';
 
 interface EvaluationResultProps {
@@ -238,12 +238,21 @@ export const EvaluationResult: React.FC<EvaluationResultProps> = ({
         </CardContent>
 
         <CardFooter className="flex justify-between">
-          <Button
-            variant="outline"
-            onClick={() => window.print()}
-          >
-            Imprimer le rapport
-          </Button>
+          <div className="flex space-x-2">
+            <Button
+              variant="outline"
+              onClick={onReset}
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Retour
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => window.print()}
+            >
+              Imprimer le rapport
+            </Button>
+          </div>
           
           <Button
             onClick={onReset}
