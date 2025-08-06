@@ -5,10 +5,15 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Header } from '@/components/Common/Header';
-import { useApi } from '@/hooks/useApi';
-import { creditService } from '@/services/creditService';
+import { RoleProtectedRoute } from '@/components/Common/RoleProtectedRoute';
+import { ClientEditForm } from '@/components/Credit/ClientEditForm';
+import { useAuth } from '@/contexts/AuthContext';
+import { useApi, useApiMutation } from '@/hooks/useApi';
+import { creditService, ClientData } from '@/services/creditService';
 import { adminService } from '@/services/adminService';
+import { toast } from 'sonner';
 import { 
   ArrowLeft, 
   User, 
@@ -26,17 +31,22 @@ import {
   XCircle,
   Clock,
   Download,
-  Eye
+  Eye,
+  Edit,
+  Trash2
 } from 'lucide-react';
 
 export const ClientDetails: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { clientId } = useParams();
   const [searchParams] = useSearchParams();
   const clientIdFromQuery = searchParams.get('id');
   const finalClientId = clientId || clientIdFromQuery;
 
   const [selectedApplication, setSelectedApplication] = useState<any>(null);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [clientToEdit, setClientToEdit] = useState<ClientData | null>(null);
 
   const { data: clientData, loading: clientLoading, error: clientError } = useApi(
     () => finalClientId ? creditService.getClientDetails(finalClientId) : Promise.resolve(null),
@@ -51,6 +61,37 @@ export const ClientDetails: React.FC = () => {
   const { data: auditLogs, loading: logsLoading } = useApi(
     () => finalClientId ? adminService.getAuditLogs({ user_id: finalClientId }).then(res => res || { logs: [] }) : Promise.resolve({ logs: [] }),
     [finalClientId]
+  );
+
+  // Mutations pour les opérations d'administration
+  const { mutate: updateClient, loading: updateLoading } = useApiMutation(
+    (updates: { clientId: string; data: Partial<ClientData> }) => 
+      creditService.updateClient(updates.clientId, updates.data),
+    {
+      onSuccess: (updatedClient) => {
+        toast.success('Client mis à jour avec succès');
+        setIsEditMode(false);
+        setClientToEdit(null);
+        // Recharger les données du client
+        window.location.reload();
+      },
+      onError: (error) => {
+        toast.error(`Erreur lors de la mise à jour: ${error}`);
+      }
+    }
+  );
+
+  const { mutate: deleteClient, loading: deleteLoading } = useApiMutation(
+    (clientId: string) => creditService.deleteClient(clientId),
+    {
+      onSuccess: () => {
+        toast.success('Client supprimé avec succès');
+        navigate('/dashboard');
+      },
+      onError: (error) => {
+        toast.error(`Erreur lors de la suppression: ${error}`);
+      }
+    }
   );
 
   if (!finalClientId) {
@@ -138,6 +179,46 @@ export const ClientDetails: React.FC = () => {
     return 'text-destructive';
   };
 
+  const handleEditClient = () => {
+    setClientToEdit(clientData);
+    setIsEditMode(true);
+  };
+
+  const handleSaveClient = (updates: Partial<ClientData>) => {
+    if (finalClientId) {
+      updateClient({ clientId: finalClientId, data: updates });
+    }
+  };
+
+  const handleDeleteClient = () => {
+    if (finalClientId) {
+      deleteClient(finalClientId);
+    }
+  };
+
+  const isAdmin = user?.role === 'admin';
+
+  if (isEditMode && clientToEdit) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
+        <Header />
+        <div className="container mx-auto px-4 py-8">
+          <div className="max-w-4xl mx-auto">
+            <ClientEditForm
+              client={clientToEdit}
+              onSave={handleSaveClient}
+              onCancel={() => {
+                setIsEditMode(false);
+                setClientToEdit(null);
+              }}
+              isLoading={updateLoading}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
       <Header />
@@ -160,6 +241,50 @@ export const ClientDetails: React.FC = () => {
                 <p className="text-muted-foreground">Informations complètes et historique</p>
               </div>
             </div>
+            
+            {isAdmin && (
+              <div className="flex space-x-2">
+                <Button
+                  onClick={handleEditClient}
+                  className="flex items-center space-x-2"
+                  disabled={updateLoading}
+                >
+                  <Edit className="h-4 w-4" />
+                  <span>Modifier</span>
+                </Button>
+                
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="destructive"
+                      className="flex items-center space-x-2"
+                      disabled={deleteLoading}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      <span>Supprimer</span>
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Êtes-vous sûr de vouloir supprimer définitivement ce client ? 
+                        Cette action est irréversible et supprimera toutes les données associées.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Annuler</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleDeleteClient}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        Supprimer définitivement
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            )}
           </div>
 
           {/* Profil du client */}

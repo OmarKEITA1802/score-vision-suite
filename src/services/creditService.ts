@@ -205,49 +205,12 @@ class CreditService {
   }
 
   async getClients(): Promise<ClientData[]> {
+    this.initializeMockData();
     return new Promise((resolve) => {
       setTimeout(() => {
-        const mockClients: ClientData[] = [
-          {
-            id: 'client-1',
-            firstName: 'Jean',
-            lastName: 'Dupont',
-            email: 'jean.dupont@email.com',
-            phone: '+33 6 12 34 56 78',
-            address: '123 Rue de la Paix, 75001 Paris',
-            profession: 'Ingénieur logiciel',
-            monthlyIncome: 4500,
-            currentDebt: 1200,
-            debtRatio: 0.27,
-            score: 0.85,
-            lastScore: 0.80,
-            status: 'ACTIVE',
-            applications: 3,
-            totalApproved: 2,
-            lastActivity: '2024-01-16T14:20:00Z',
-            createdAt: '2023-06-15T10:00:00Z'
-          },
-          {
-            id: 'client-2',
-            firstName: 'Marie',
-            lastName: 'Martin',
-            email: 'marie.martin@email.com',
-            phone: '+33 6 87 65 43 21',
-            address: '456 Avenue des Champs, 69000 Lyon',
-            profession: 'Commercial',
-            monthlyIncome: 3200,
-            currentDebt: 800,
-            debtRatio: 0.25,
-            score: 0.72,
-            lastScore: 0.68,
-            status: 'ACTIVE',
-            applications: 1,
-            totalApproved: 0,
-            lastActivity: '2024-01-20T09:15:00Z',
-            createdAt: '2023-11-20T15:30:00Z'
-          }
-        ];
-        resolve(mockClients);
+        const storedClients = localStorage.getItem('mockClients');
+        const clients = storedClients ? JSON.parse(storedClients) : [];
+        resolve(clients);
       }, 800);
     });
   }
@@ -285,6 +248,93 @@ class CreditService {
       }, 600);
     });
   }
+
+  // Méthodes d'administration pour les clients
+  async updateClient(clientId: string, updates: Partial<ClientData>): Promise<ClientData> {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        // Simulation de mise à jour côté client
+        const clients = JSON.parse(localStorage.getItem('mockClients') || '[]');
+        const clientIndex = clients.findIndex((c: ClientData) => c.id === clientId);
+        
+        if (clientIndex === -1) {
+          reject(new Error('Client non trouvé'));
+          return;
+        }
+        
+        clients[clientIndex] = { ...clients[clientIndex], ...updates };
+        localStorage.setItem('mockClients', JSON.stringify(clients));
+        
+        resolve(clients[clientIndex]);
+      }, 1000);
+    });
+  }
+
+  async deleteClient(clientId: string): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        // Simulation de suppression côté client
+        const clients = JSON.parse(localStorage.getItem('mockClients') || '[]');
+        const filteredClients = clients.filter((c: ClientData) => c.id !== clientId);
+        
+        if (clients.length === filteredClients.length) {
+          reject(new Error('Client non trouvé'));
+          return;
+        }
+        
+        localStorage.setItem('mockClients', JSON.stringify(filteredClients));
+        resolve(true);
+      }, 800);
+    });
+  }
+
+  // Initialiser le localStorage avec les données mock si nécessaire
+  private initializeMockData() {
+    if (!localStorage.getItem('mockClients')) {
+      const mockClients: ClientData[] = [
+        {
+          id: 'client-1',
+          firstName: 'Jean',
+          lastName: 'Dupont',
+          email: 'jean.dupont@email.com',
+          phone: '+33 6 12 34 56 78',
+          address: '123 Rue de la Paix, 75001 Paris',
+          profession: 'Ingénieur logiciel',
+          monthlyIncome: 4500,
+          currentDebt: 1200,
+          debtRatio: 0.27,
+          score: 0.85,
+          lastScore: 0.80,
+          status: 'ACTIVE',
+          applications: 3,
+          totalApproved: 2,
+          lastActivity: '2024-01-16T14:20:00Z',
+          createdAt: '2023-06-15T10:00:00Z'
+        },
+        {
+          id: 'client-2',
+          firstName: 'Marie',
+          lastName: 'Martin',
+          email: 'marie.martin@email.com',
+          phone: '+33 6 87 65 43 21',
+          address: '456 Avenue des Champs, 69000 Lyon',
+          profession: 'Commercial',
+          monthlyIncome: 3200,
+          currentDebt: 800,
+          debtRatio: 0.25,
+          score: 0.72,
+          lastScore: 0.68,
+          status: 'ACTIVE',
+          applications: 1,
+          totalApproved: 0,
+          lastActivity: '2024-01-20T09:15:00Z',
+          createdAt: '2023-11-20T15:30:00Z'
+        }
+      ];
+      localStorage.setItem('mockClients', JSON.stringify(mockClients));
+    }
+  }
 }
+
 
 export const creditService = new CreditService();
