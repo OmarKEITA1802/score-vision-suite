@@ -28,6 +28,21 @@ export const Header: React.FC = () => {
   const userRole = getUserRole();
   const roleConfig = getRoleConfig(userRole);
 
+  const handleProfileClick = () => {
+    console.log('Navigation vers le profil utilisateur');
+    // TODO: Implémenter la navigation vers la page de profil
+  };
+
+  const handleSettingsClick = () => {
+    console.log('Navigation vers les paramètres');
+    // TODO: Implémenter la navigation vers les paramètres
+  };
+
+  const handleAdminClick = () => {
+    console.log('Navigation vers l\'administration');
+    // TODO: Implémenter la navigation vers l'administration
+  };
+
   const getUserInitials = () => {
     if (!user?.firstName || !user?.lastName) return 'U';
     return `${user.firstName[0]}${user.lastName[0]}`.toUpperCase();
@@ -110,12 +125,12 @@ export const Header: React.FC = () => {
               
               <DropdownMenuSeparator />
               
-              <DropdownMenuItem className="cursor-pointer">
+              <DropdownMenuItem className="cursor-pointer" onClick={handleProfileClick}>
                 <User className="mr-2 h-4 w-4" />
                 Mon profil
               </DropdownMenuItem>
               
-              <DropdownMenuItem className="cursor-pointer">
+              <DropdownMenuItem className="cursor-pointer" onClick={handleSettingsClick}>
                 <Settings className="mr-2 h-4 w-4" />
                 Paramètres
               </DropdownMenuItem>
@@ -123,7 +138,7 @@ export const Header: React.FC = () => {
               {hasPermission('system_admin') && (
                 <>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem className="cursor-pointer">
+                  <DropdownMenuItem className="cursor-pointer" onClick={handleAdminClick}>
                     <Shield className="mr-2 h-4 w-4" />
                     Administration
                   </DropdownMenuItem>
