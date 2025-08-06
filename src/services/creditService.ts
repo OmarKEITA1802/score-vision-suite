@@ -47,6 +47,11 @@ export interface ClientData {
   lastName: string;
   email: string;
   phone?: string;
+  address?: string;
+  profession?: string;
+  monthlyIncome?: number;
+  currentDebt?: number;
+  debtRatio?: number;
   score: number;
   lastScore: number;
   status: 'ACTIVE' | 'INACTIVE' | 'BLACKLISTED';
@@ -209,6 +214,11 @@ class CreditService {
             lastName: 'Dupont',
             email: 'jean.dupont@email.com',
             phone: '+33 6 12 34 56 78',
+            address: '123 Rue de la Paix, 75001 Paris',
+            profession: 'Ingénieur logiciel',
+            monthlyIncome: 4500,
+            currentDebt: 1200,
+            debtRatio: 0.27,
             score: 0.85,
             lastScore: 0.80,
             status: 'ACTIVE',
@@ -223,6 +233,11 @@ class CreditService {
             lastName: 'Martin',
             email: 'marie.martin@email.com',
             phone: '+33 6 87 65 43 21',
+            address: '456 Avenue des Champs, 69000 Lyon',
+            profession: 'Commercial',
+            monthlyIncome: 3200,
+            currentDebt: 800,
+            debtRatio: 0.25,
             score: 0.72,
             lastScore: 0.68,
             status: 'ACTIVE',
@@ -235,6 +250,16 @@ class CreditService {
         resolve(mockClients);
       }, 800);
     });
+  }
+
+  async getClientDetails(clientId: string): Promise<ClientData | null> {
+    const clients = await this.getClients();
+    return clients.find(client => client.id === clientId) || null;
+  }
+
+  async getClientApplications(clientId: string): Promise<CreditApplication[]> {
+    const applications = await this.getApplications();
+    return applications.filter(app => app.clientId === clientId);
   }
 
   async getScoreSummary(): Promise<ScoreSummary> {

@@ -297,8 +297,8 @@ export const AdminDashboard: React.FC = () => {
         maxItems={10}
         showFilters={true}
         onClientSelect={(client) => {
-          console.log('Client sélectionné:', client);
-          // Navigation vers le détail du client
+          // Navigation vers la page détaillée des clients
+          navigate(`/client-details?id=${client.id}`);
         }}
       />
 

@@ -20,6 +20,7 @@ import Settings from "./pages/Settings";
 import AdvancedAnalytics from "./pages/AdvancedAnalytics";
 import AllApplications from "./pages/AllApplications";
 import ClientsList from "./pages/ClientsList";
+import { ClientDetails } from "./pages/ClientDetails";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -82,7 +83,23 @@ const App = () => (
               path="/clients" 
               element={
                 <ProtectedRoute>
-                  <AllApplications />
+                  <ClientsList />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/clients/:clientId" 
+              element={
+                <ProtectedRoute>
+                  <ClientDetails />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/client-details" 
+              element={
+                <ProtectedRoute>
+                  <ClientDetails />
                 </ProtectedRoute>
               } 
             />
@@ -90,7 +107,7 @@ const App = () => (
               path="/clients-list" 
               element={
                 <ProtectedRoute>
-                  <ClientsList />
+                  <AllApplications />
                 </ProtectedRoute>
               } 
             />
