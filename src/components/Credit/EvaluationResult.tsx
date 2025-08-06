@@ -11,12 +11,16 @@ interface EvaluationResultProps {
   result: CreditPredictionResult;
   formData: CreditPredictionRequest;
   onReset: () => void;
+  isExaminationMode?: boolean;
+  applicationId?: string | null;
 }
 
 export const EvaluationResult: React.FC<EvaluationResultProps> = ({
   result,
   formData,
-  onReset
+  onReset,
+  isExaminationMode = false,
+  applicationId,
 }) => {
   const scorePercentage = Math.round(result.probability * 100);
   const isApproved = result.decision === 'APPROVED';
@@ -55,6 +59,30 @@ export const EvaluationResult: React.FC<EvaluationResultProps> = ({
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6 animate-fade-in">
+      {/* Header mode examen */}
+      {isExaminationMode && (
+        <Card className="fintech-card border-primary/50 bg-primary/5">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
+                  <CheckCircle2 className="h-4 w-4 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-primary">Mode Examen - Décision du Modèle</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Demande #{applicationId} - Visualisation de l'analyse automatisée
+                  </p>
+                </div>
+              </div>
+              <Badge variant="outline" className="border-primary text-primary">
+                Examen
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+      
       {/* Résultat principal */}
       <Card className={`fintech-card-premium bg-gradient-to-br ${getScoreBgColor(scorePercentage)}`}>
         <CardHeader className="text-center">
@@ -254,13 +282,15 @@ export const EvaluationResult: React.FC<EvaluationResultProps> = ({
             </Button>
           </div>
           
-          <Button
-            onClick={onReset}
-            className="btn-primary"
-          >
-            <RotateCcw className="w-4 h-4 mr-2" />
-            Nouvelle évaluation
-          </Button>
+          {!isExaminationMode && (
+            <Button
+              onClick={onReset}
+              className="btn-primary"
+            >
+              <RotateCcw className="w-4 h-4 mr-2" />
+              Nouvelle évaluation
+            </Button>
+          )}
         </CardFooter>
       </Card>
     </div>

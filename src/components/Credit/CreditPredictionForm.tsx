@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
+import { useSearchParams } from 'react-router-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
@@ -85,7 +86,11 @@ type CreditFormData = z.infer<typeof creditFormSchema>;
 
 export const CreditPredictionForm: React.FC = () => {
   const [result, setResult] = useState<CreditPredictionResult | null>(null);
+  const [searchParams] = useSearchParams();
+  const [isExaminationMode, setIsExaminationMode] = useState(false);
   const { toast } = useToast();
+  
+  const applicationId = searchParams.get('applicationId');
 
   const form = useForm<CreditFormData>({
     resolver: zodResolver(creditFormSchema),
@@ -121,9 +126,55 @@ export const CreditPredictionForm: React.FC = () => {
     }
   };
 
+  // Load application data for examination
+  useEffect(() => {
+    if (applicationId) {
+      setIsExaminationMode(true);
+      // Simulate loading existing application and its model decision
+      const loadApplication = async () => {
+        try {
+          // This would normally fetch the application data and model decision
+          const mockApplicationData = {
+            familyCircumstances: 'MARRIED',
+            activity: 'EMPLOYEE',
+            legalForm: 'INDIVIDUAL',
+            isRenewal: 0,
+            revenues: 250000,
+            charges: 80000,
+            guaranteeEstimatedValue: 500000,
+            amountAsked: 150000,
+            debt: 50000,
+          };
+          
+          // Set form data
+          form.reset(mockApplicationData);
+          
+          // Simulate the model's decision
+          const modelDecision = await creditService.predictCredit(mockApplicationData as CreditPredictionRequest);
+          setResult(modelDecision);
+          
+          toast({
+            title: 'Mode examen',
+            description: 'Visualisation de la décision du modèle pour cette demande',
+          });
+        } catch (error: any) {
+          toast({
+            variant: 'destructive',
+            title: 'Erreur',
+            description: 'Impossible de charger les données de la demande',
+          });
+        }
+      };
+      
+      loadApplication();
+    }
+  }, [applicationId, form, toast]);
+
   const handleReset = () => {
-    form.reset();
-    setResult(null);
+    if (!isExaminationMode) {
+      form.reset();
+      setResult(null);
+    }
   };
 
   const formatCurrency = (value: number) => {
@@ -142,6 +193,8 @@ export const CreditPredictionForm: React.FC = () => {
         result={result} 
         formData={formData as CreditPredictionRequest}
         onReset={handleReset}
+        isExaminationMode={isExaminationMode}
+        applicationId={applicationId}
       />
     );
   }
