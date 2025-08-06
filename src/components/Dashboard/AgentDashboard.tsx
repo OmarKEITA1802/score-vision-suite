@@ -62,7 +62,10 @@ export const AgentDashboard: React.FC = () => {
             </p>
           </div>
           <div className="flex space-x-3">
-            <Button className="btn-primary">
+            <Button 
+              className="btn-primary"
+              onClick={() => navigate('/credit-application')}
+            >
               <Plus className="h-4 w-4 mr-2" />
               Nouvelle demande
             </Button>
