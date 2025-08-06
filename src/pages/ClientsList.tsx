@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { ArrowLeft, Phone, Mail, Calendar, TrendingUp, AlertCircle, User, CreditCard, MapPin, Briefcase } from 'lucide-react';
+import { ArrowLeft, Phone, Mail, Calendar, TrendingUp, AlertCircle, User, CreditCard, MapPin, Briefcase, MessageSquare } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Header } from '@/components/Common/Header';
 
@@ -12,6 +12,7 @@ const ClientsList: React.FC = () => {
   const navigate = useNavigate();
   const [selectedClient, setSelectedClient] = useState<any>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
 
   // Mock data for recent clients
   const recentClients = [
@@ -133,6 +134,26 @@ const ClientsList: React.FC = () => {
     setIsDetailModalOpen(true);
   };
 
+  const handleContact = (client: any) => {
+    setSelectedClient(client);
+    setIsContactModalOpen(true);
+  };
+
+  const handlePhoneCall = (phone: string) => {
+    window.open(`tel:${phone}`);
+  };
+
+  const handleEmail = (email: string, name: string) => {
+    const subject = encodeURIComponent(`Contact concernant votre demande de crédit`);
+    const body = encodeURIComponent(`Bonjour ${name},\n\nJe vous contacte concernant votre demande de crédit.\n\nCordialement,`);
+    window.open(`mailto:${email}?subject=${subject}&body=${body}`);
+  };
+
+  const handleSMS = (phone: string, name: string) => {
+    const message = encodeURIComponent(`Bonjour ${name}, je vous contacte concernant votre demande de crédit.`);
+    window.open(`sms:${phone}?body=${message}`);
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('fr-FR', {
       day: '2-digit',
@@ -237,7 +258,12 @@ const ClientsList: React.FC = () => {
                     >
                       Voir détails
                     </Button>
-                    <Button variant="secondary" size="sm" className="flex-1">
+                    <Button 
+                      variant="secondary" 
+                      size="sm" 
+                      className="flex-1"
+                      onClick={() => handleContact(client)}
+                    >
                       Contacter
                     </Button>
                   </div>
@@ -421,6 +447,86 @@ const ClientsList: React.FC = () => {
                 </Button>
                 <Button>
                   Nouvelle évaluation
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de contact */}
+      <Dialog open={isContactModalOpen} onOpenChange={setIsContactModalOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2">
+              <Phone className="h-5 w-5" />
+              <span>Contacter le client</span>
+            </DialogTitle>
+            <DialogDescription>
+              Choisissez un moyen de communication avec {selectedClient?.name}
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedClient && (
+            <div className="space-y-4">
+              {/* Options de contact */}
+              <div className="space-y-3">
+                <Button
+                  variant="outline"
+                  className="w-full h-16 flex items-center justify-start space-x-4"
+                  onClick={() => {
+                    handlePhoneCall(selectedClient.phone);
+                    setIsContactModalOpen(false);
+                  }}
+                >
+                  <div className="p-2 bg-primary/10 rounded-lg">
+                    <Phone className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="text-left">
+                    <p className="font-medium">Appeler</p>
+                    <p className="text-sm text-muted-foreground">{selectedClient.phone}</p>
+                  </div>
+                </Button>
+
+                <Button
+                  variant="outline"
+                  className="w-full h-16 flex items-center justify-start space-x-4"
+                  onClick={() => {
+                    handleEmail(selectedClient.email, selectedClient.name);
+                    setIsContactModalOpen(false);
+                  }}
+                >
+                  <div className="p-2 bg-primary/10 rounded-lg">
+                    <Mail className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="text-left">
+                    <p className="font-medium">Envoyer un email</p>
+                    <p className="text-sm text-muted-foreground">{selectedClient.email}</p>
+                  </div>
+                </Button>
+
+                <Button
+                  variant="outline"
+                  className="w-full h-16 flex items-center justify-start space-x-4"
+                  onClick={() => {
+                    handleSMS(selectedClient.phone, selectedClient.name);
+                    setIsContactModalOpen(false);
+                  }}
+                >
+                  <div className="p-2 bg-primary/10 rounded-lg">
+                    <MessageSquare className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="text-left">
+                    <p className="font-medium">Envoyer un SMS</p>
+                    <p className="text-sm text-muted-foreground">{selectedClient.phone}</p>
+                  </div>
+                </Button>
+              </div>
+
+              {/* Actions */}
+              <div className="flex justify-end pt-4">
+                <Button variant="outline" onClick={() => setIsContactModalOpen(false)}>
+                  Annuler
                 </Button>
               </div>
             </div>
