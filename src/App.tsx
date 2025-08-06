@@ -17,6 +17,7 @@ import Dashboard from "./pages/Dashboard";
 import CreditApplication from "./pages/CreditApplication";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
+import AdvancedAnalytics from "./pages/AdvancedAnalytics";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -64,6 +65,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Settings />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/analytics" 
+              element={
+                <ProtectedRoute>
+                  <AdvancedAnalytics />
                 </ProtectedRoute>
               } 
             />

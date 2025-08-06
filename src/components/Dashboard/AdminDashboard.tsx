@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -26,6 +27,7 @@ import {
 import dashboardHero from '@/assets/dashboard-hero.jpg';
 
 export const AdminDashboard: React.FC = () => {
+  const navigate = useNavigate();
   const { data: summary, loading: summaryLoading } = useApi(
     () => creditService.getScoreSummary(),
     []
@@ -113,7 +115,12 @@ export const AdminDashboard: React.FC = () => {
                 <Download className="h-4 w-4 mr-2" />
                 Exporter rapport
               </Button>
-              <Button variant="outline" size="sm" className="text-primary-foreground border-primary-foreground/20 btn-animated">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="text-primary-foreground border-primary-foreground/20 btn-animated"
+                onClick={() => navigate('/analytics')}
+              >
                 <BarChart3 className="h-4 w-4 mr-2" />
                 Analytics avancées
               </Button>
