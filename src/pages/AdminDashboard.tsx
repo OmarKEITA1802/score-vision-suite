@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ResponsiveLayout } from '@/components/Mobile/ResponsiveLayout';
 import { RoleManagementSystem } from '@/components/RoleManagement/RoleManagementSystem';
 import { UserManagement } from '@/components/Admin/UserManagement';
+import { AdminOverview } from '@/components/Admin/AdminOverview';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { 
@@ -67,18 +68,7 @@ const AdminDashboard = () => {
           </TabsList>
 
           <TabsContent value="overview">
-            <Card>
-              <CardHeader>
-                <CardTitle>📊 Vue d'ensemble du système</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center text-muted-foreground py-8">
-                  Statistiques globales du système à venir...
-                  <br />
-                  Connecté à votre backend Django
-                </div>
-              </CardContent>
-            </Card>
+            <AdminOverview />
           </TabsContent>
 
           <TabsContent value="users">
