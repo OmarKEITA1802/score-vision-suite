@@ -492,73 +492,115 @@ export const ChatBot: React.FC<ChatBotProps> = ({ className }) => {
               </div>
             )}
 
-            {/* Zone de saisie améliorée et plus spacieuse */}
-            <div className="p-6 border-t border-border bg-card/80 backdrop-blur-sm">
-              <div className="flex gap-4 items-end">
-                <div className="flex-1 relative">
-                  <Input
-                    ref={inputRef}
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    placeholder="💬 Tapez votre message... (Entrée pour envoyer)"
-                    className="pr-16 pl-6 py-4 rounded-2xl border-2 border-border/50 focus:border-primary transition-all duration-300 bg-background/70 backdrop-blur-sm text-base shadow-sm hover:shadow-md focus:shadow-lg resize-none min-h-[3.5rem]"
-                    disabled={isLoading}
-                    maxLength={500}
-                  />
-                  
-                  {/* Compteur de caractères */}
-                  <div className="absolute bottom-2 right-16 text-xs text-muted-foreground/80 bg-background/80 px-2 py-1 rounded-md">
-                    {message.length}/500
+            {/* Zone de saisie moderne et élégante */}
+            <div className="p-4 bg-gradient-to-t from-background via-background/95 to-background/80 backdrop-blur-xl border-t border-border/20">
+              <div className="relative">
+                {/* Conteneur principal de saisie */}
+                <div className="relative flex items-center gap-3 p-2 bg-muted/30 rounded-3xl border border-border/30 shadow-inner transition-all duration-300 hover:bg-muted/40 focus-within:bg-background/90 focus-within:border-primary/50 focus-within:shadow-lg">
+                  {/* Input principal */}
+                  <div className="flex-1 relative">
+                    <Input
+                      ref={inputRef}
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                      placeholder="Écrivez votre message..."
+                      className="border-0 bg-transparent pl-4 pr-20 py-3 text-base placeholder:text-muted-foreground/70 focus-visible:ring-0 focus-visible:ring-offset-0 resize-none min-h-[2.5rem]"
+                      disabled={isLoading}
+                      maxLength={500}
+                    />
+                    
+                    {/* Outils intégrés à droite */}
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                      {/* Compteur de caractères */}
+                      {message.length > 400 && (
+                        <div className="text-xs text-muted-foreground/80 bg-background/80 px-2 py-1 rounded-full">
+                          {message.length}/500
+                        </div>
+                      )}
+                      
+                      {/* Bouton microphone */}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 rounded-full hover:bg-primary/10 transition-all duration-200"
+                        disabled
+                        title="Enregistrement vocal (bientôt disponible)"
+                      >
+                        <Mic className="h-4 w-4 text-muted-foreground/50" />
+                      </Button>
+                      
+                      {/* Bouton pièce jointe */}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 rounded-full hover:bg-primary/10 transition-all duration-200"
+                        disabled
+                        title="Ajouter une pièce jointe (bientôt disponible)"
+                      >
+                        <Paperclip className="h-4 w-4 text-muted-foreground/50" />
+                      </Button>
+                    </div>
                   </div>
                   
-                  {/* Bouton microphone (placeholder) */}
+                  {/* Bouton d'envoi intégré */}
                   <Button
-                    variant="ghost"
+                    onClick={handleSendMessage}
+                    disabled={!message.trim() || isLoading}
+                    className={cn(
+                      "h-10 w-10 rounded-full transition-all duration-300 group shrink-0",
+                      message.trim() && !isLoading
+                        ? "bg-gradient-to-r from-primary to-primary-glow hover:from-primary-glow hover:to-primary shadow-md hover:shadow-lg scale-100 hover:scale-110"
+                        : "bg-muted text-muted-foreground/50 shadow-none"
+                    )}
                     size="icon"
-                    className="absolute right-2 top-2 h-10 w-10 hover:bg-primary/10 rounded-xl transition-all duration-200"
-                    disabled
                   >
-                    <Mic className="h-4 w-4 text-muted-foreground" />
+                    {isLoading ? (
+                      <RefreshCw className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Send className="h-4 w-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                    )}
                   </Button>
                 </div>
                 
-                {/* Bouton d'envoi amélioré */}
-                <Button
-                  onClick={handleSendMessage}
-                  disabled={!message.trim() || isLoading}
-                  className={cn(
-                    "h-14 w-14 rounded-2xl transition-all duration-300 group shadow-lg hover:shadow-xl",
-                    message.trim() && !isLoading
-                      ? "bg-gradient-to-r from-primary to-primary-glow hover:from-primary-glow hover:to-primary hover:scale-105"
-                      : "bg-muted/50 border-2 border-border"
-                  )}
-                  size="icon"
-                >
-                  {isLoading ? (
-                    <RefreshCw className="h-6 w-6 animate-spin" />
-                  ) : (
-                    <Send className="h-6 w-6 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                  )}
-                </Button>
-              </div>
-              
-              {/* Suggestion de message si vide - plus spacieuses */}
-              {!message && !isLoading && messages.length > 0 && (
-                <div className="mt-4 flex gap-3 animate-fade-in">
-                  {['👍 Merci !', '❓ Autre question', '📋 Résumé'].map((suggestion) => (
-                    <Button
-                      key={suggestion}
-                      variant="outline"
-                      size="sm"
-                      className="text-sm h-9 px-4 rounded-full hover:bg-primary/5 border-border/50 transition-all duration-200 hover:scale-105"
-                      onClick={() => setMessage(suggestion)}
-                    >
-                      {suggestion}
-                    </Button>
-                  ))}
+                {/* Suggestions rapides */}
+                {!message && !isLoading && messages.length > 0 && (
+                  <div className="mt-3 flex flex-wrap gap-2 animate-fade-in">
+                    {['👍 Merci !', '❓ Autre question', '📋 Résumé'].map((suggestion) => (
+                      <Button
+                        key={suggestion}
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 px-3 rounded-full text-sm text-muted-foreground hover:text-foreground hover:bg-primary/5 border border-border/30 hover:border-primary/30 transition-all duration-200"
+                        onClick={() => setMessage(suggestion)}
+                      >
+                        {suggestion}
+                      </Button>
+                    ))}
+                  </div>
+                )}
+                
+                {/* Indicateur de statut */}
+                <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground/60">
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
+                      <div className="w-2 h-2 bg-success rounded-full animate-pulse" />
+                      <span>IA connectée</span>
+                    </div>
+                    {isLoading && (
+                      <div className="flex items-center gap-1">
+                        <div className="w-1 h-1 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                        <div className="w-1 h-1 bg-primary rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                        <div className="w-1 h-1 bg-primary rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                        <span>Réflexion en cours...</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="text-xs">
+                    Appuyez sur Entrée pour envoyer
+                  </div>
                 </div>
-              )}
+              </div>
             </div>
           </>
         )}
