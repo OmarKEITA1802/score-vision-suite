@@ -243,6 +243,14 @@ export const ChatBot: React.FC<ChatBotProps> = ({ className }) => {
                   <RefreshCw className="mr-2 h-4 w-4" />
                   Nouveau chat
                 </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem 
+                  onClick={() => setIsOpen(false)}
+                  className="text-destructive focus:text-destructive"
+                >
+                  <X className="mr-2 h-4 w-4" />
+                  Quitter le chat
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
 
