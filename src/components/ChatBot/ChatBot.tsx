@@ -380,7 +380,7 @@ export const ChatBot: React.FC<ChatBotProps> = ({ className }) => {
                             <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
                             
                             {/* Actions de feedback pour les messages du bot */}
-                            {msg.sender === 'bot' && msg.type !== 'loading' && msg.type !== 'quickActions' && (
+                            {msg.sender === 'bot' && (!msg.type || msg.type === 'text') && (
                               <div className="flex items-center justify-between mt-3 pt-2 border-t border-border/50">
                                 <span className="text-xs text-muted-foreground flex items-center gap-1">
                                   <Clock className="h-3 w-3" />
@@ -492,9 +492,9 @@ export const ChatBot: React.FC<ChatBotProps> = ({ className }) => {
               </div>
             )}
 
-            {/* Zone de saisie améliorée */}
-            <div className="p-4 border-t border-border bg-card">
-              <div className="flex gap-3 items-end">
+            {/* Zone de saisie améliorée et plus spacieuse */}
+            <div className="p-6 border-t border-border bg-card/80 backdrop-blur-sm">
+              <div className="flex gap-4 items-end">
                 <div className="flex-1 relative">
                   <Input
                     ref={inputRef}
@@ -502,13 +502,13 @@ export const ChatBot: React.FC<ChatBotProps> = ({ className }) => {
                     onChange={(e) => setMessage(e.target.value)}
                     onKeyPress={handleKeyPress}
                     placeholder="💬 Tapez votre message... (Entrée pour envoyer)"
-                    className="pr-12 pl-4 py-3 rounded-xl border-2 border-border focus:border-primary transition-all duration-200 bg-background/50"
+                    className="pr-16 pl-6 py-4 rounded-2xl border-2 border-border/50 focus:border-primary transition-all duration-300 bg-background/70 backdrop-blur-sm text-base shadow-sm hover:shadow-md focus:shadow-lg resize-none min-h-[3.5rem]"
                     disabled={isLoading}
                     maxLength={500}
                   />
                   
                   {/* Compteur de caractères */}
-                  <div className="absolute bottom-1 right-12 text-xs text-muted-foreground">
+                  <div className="absolute bottom-2 right-16 text-xs text-muted-foreground/80 bg-background/80 px-2 py-1 rounded-md">
                     {message.length}/500
                   </div>
                   
@@ -516,7 +516,7 @@ export const ChatBot: React.FC<ChatBotProps> = ({ className }) => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="absolute right-1 top-1 h-8 w-8 hover:bg-primary/10"
+                    className="absolute right-2 top-2 h-10 w-10 hover:bg-primary/10 rounded-xl transition-all duration-200"
                     disabled
                   >
                     <Mic className="h-4 w-4 text-muted-foreground" />
@@ -528,30 +528,30 @@ export const ChatBot: React.FC<ChatBotProps> = ({ className }) => {
                   onClick={handleSendMessage}
                   disabled={!message.trim() || isLoading}
                   className={cn(
-                    "h-12 w-12 rounded-xl transition-all duration-300 group",
+                    "h-14 w-14 rounded-2xl transition-all duration-300 group shadow-lg hover:shadow-xl",
                     message.trim() && !isLoading
-                      ? "bg-gradient-to-r from-primary to-primary-glow hover:from-primary-glow hover:to-primary shadow-lg hover:shadow-xl"
-                      : "bg-muted"
+                      ? "bg-gradient-to-r from-primary to-primary-glow hover:from-primary-glow hover:to-primary hover:scale-105"
+                      : "bg-muted/50 border-2 border-border"
                   )}
                   size="icon"
                 >
                   {isLoading ? (
-                    <RefreshCw className="h-5 w-5 animate-spin" />
+                    <RefreshCw className="h-6 w-6 animate-spin" />
                   ) : (
-                    <Send className="h-5 w-5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                    <Send className="h-6 w-6 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                   )}
                 </Button>
               </div>
               
-              {/* Suggestion de message si vide */}
+              {/* Suggestion de message si vide - plus spacieuses */}
               {!message && !isLoading && messages.length > 0 && (
-                <div className="mt-2 flex gap-2 animate-fade-in">
+                <div className="mt-4 flex gap-3 animate-fade-in">
                   {['👍 Merci !', '❓ Autre question', '📋 Résumé'].map((suggestion) => (
                     <Button
                       key={suggestion}
                       variant="outline"
                       size="sm"
-                      className="text-xs h-7 rounded-full hover:bg-primary/5"
+                      className="text-sm h-9 px-4 rounded-full hover:bg-primary/5 border-border/50 transition-all duration-200 hover:scale-105"
                       onClick={() => setMessage(suggestion)}
                     >
                       {suggestion}
