@@ -99,8 +99,11 @@ export const EvaluationResult: React.FC<EvaluationResultProps> = ({
             )}
           </div>
           <CardTitle className="text-3xl font-bold">
-            Score Crédit: {scorePercentage}%
+            Score: {isApproved ? '1' : '0'}
           </CardTitle>
+          <div className="text-lg text-muted-foreground mt-2">
+            Probabilité: {scorePercentage}%
+          </div>
           <CardDescription className="text-lg">
             <Badge 
               variant={isApproved ? 'default' : 'destructive'}
