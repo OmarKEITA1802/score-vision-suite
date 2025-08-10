@@ -348,14 +348,20 @@ export const CreditPredictionForm: React.FC = () => {
                           <Euro className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                           <FormControl>
                             <Input
-                              type="number"
-                              placeholder="3000"
+                              type="text"
+                              placeholder="Ex: 300000"
                               className="pl-10"
-                              {...field}
-                              onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                              value={field.value || ''}
+                              onChange={(e) => {
+                                const value = e.target.value.replace(/[^0-9]/g, '');
+                                field.onChange(value ? parseFloat(value) : 0);
+                              }}
                             />
                           </FormControl>
                         </div>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Saisissez vos revenus mensuels nets
+                        </p>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -371,14 +377,20 @@ export const CreditPredictionForm: React.FC = () => {
                           <Euro className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                           <FormControl>
                             <Input
-                              type="number"
-                              placeholder="1200"
+                              type="text"
+                              placeholder="Ex: 120000"
                               className="pl-10"
-                              {...field}
-                              onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                              value={field.value || ''}
+                              onChange={(e) => {
+                                const value = e.target.value.replace(/[^0-9]/g, '');
+                                field.onChange(value ? parseFloat(value) : 0);
+                              }}
                             />
                           </FormControl>
                         </div>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Loyer, nourriture, transport, etc.
+                        </p>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -394,14 +406,20 @@ export const CreditPredictionForm: React.FC = () => {
                           <Euro className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                           <FormControl>
                             <Input
-                              type="number"
-                              placeholder="50000"
+                              type="text"
+                              placeholder="Ex: 500000"
                               className="pl-10"
-                              {...field}
-                              onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                              value={field.value || ''}
+                              onChange={(e) => {
+                                const value = e.target.value.replace(/[^0-9]/g, '');
+                                field.onChange(value ? parseFloat(value) : 0);
+                              }}
                             />
                           </FormControl>
                         </div>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Bien immobilier, véhicule, etc.
+                        </p>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -417,14 +435,20 @@ export const CreditPredictionForm: React.FC = () => {
                           <Euro className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                           <FormControl>
                             <Input
-                              type="number"
-                              placeholder="25000"
+                              type="text"
+                              placeholder="Ex: 250000"
                               className="pl-10"
-                              {...field}
-                              onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                              value={field.value || ''}
+                              onChange={(e) => {
+                                const value = e.target.value.replace(/[^0-9]/g, '');
+                                field.onChange(value ? parseFloat(value) : 0);
+                              }}
                             />
                           </FormControl>
                         </div>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Montant souhaité pour le crédit
+                        </p>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -440,14 +464,20 @@ export const CreditPredictionForm: React.FC = () => {
                           <Euro className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                           <FormControl>
                             <Input
-                              type="number"
-                              placeholder="5000"
+                              type="text"
+                              placeholder="Ex: 50000"
                               className="pl-10"
-                              {...field}
-                              onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                              value={field.value || ''}
+                              onChange={(e) => {
+                                const value = e.target.value.replace(/[^0-9]/g, '');
+                                field.onChange(value ? parseFloat(value) : 0);
+                              }}
                             />
                           </FormControl>
                         </div>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Crédits en cours, dettes diverses
+                        </p>
                         <FormMessage />
                       </FormItem>
                     )}
