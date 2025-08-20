@@ -16,11 +16,11 @@ const Dashboard: React.FC = () => {
   }
 
   switch (user.role) {
-    case 'admin':
+    case 'ADMIN':
       return <AdminDashboard />;
-    case 'agent':
+    case 'AGENT':
       return <AgentDashboard />;
-    case 'client':
+    case 'CLIENT':
       return <ClientDashboard />;
     default:
       return (

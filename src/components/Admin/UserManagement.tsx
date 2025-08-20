@@ -16,8 +16,7 @@ import {
   UserCheck, 
   UserX,
   RefreshCw,
-  Search,
-  Download
+  Search
 } from 'lucide-react';
 import { adminService, User } from '@/services/adminService';
 import { useToast } from '@/hooks/use-toast';
@@ -34,11 +33,10 @@ export const UserManagement: React.FC = () => {
 
   const [newUser, setNewUser] = useState({
     email: '',
-    username: '',
-    first_name: '',
-    last_name: '',
-    role: 'client' as 'admin' | 'agent' | 'client',
-    is_active: true
+    firstName: '',
+    lastName: '',
+    role: 'CLIENT' as 'ADMIN' | 'AGENT' | 'CLIENT',
+    status: 'ACTIVE' as 'ACTIVE' | 'INACTIVE'
   });
 
   useEffect(() => {
@@ -48,11 +46,8 @@ export const UserManagement: React.FC = () => {
   const loadUsers = async () => {
     try {
       setLoading(true);
-      const response = await adminService.getUsers({
-        search: searchTerm || undefined,
-        role: roleFilter !== 'all' ? roleFilter : undefined
-      });
-      setUsers(response.users);
+      const response = await adminService.getUsers(searchTerm, roleFilter !== 'all' ? roleFilter : undefined);
+      setUsers(response);
     } catch (error: any) {
       toast({
         variant: 'destructive',
@@ -71,11 +66,10 @@ export const UserManagement: React.FC = () => {
       setIsCreateDialogOpen(false);
       setNewUser({
         email: '',
-        username: '',
-        first_name: '',
-        last_name: '',
-        role: 'client',
-        is_active: true
+        firstName: '',
+        lastName: '',
+        role: 'CLIENT',
+        status: 'ACTIVE'
       });
       toast({
         title: 'Utilisateur créé',
@@ -132,7 +126,7 @@ export const UserManagement: React.FC = () => {
 
   const handleResetPassword = async (userId: string, email: string) => {
     try {
-      const response = await adminService.resetUserPassword(userId);
+      await adminService.resetUserPassword(userId);
       toast({
         title: 'Mot de passe réinitialisé',
         description: `Un email de réinitialisation a été envoyé à ${email}`
@@ -148,9 +142,9 @@ export const UserManagement: React.FC = () => {
 
   const getRoleBadgeVariant = (role: string) => {
     switch (role) {
-      case 'admin': return 'destructive';
-      case 'agent': return 'default';
-      case 'client': return 'secondary';
+      case 'ADMIN': return 'destructive';
+      case 'AGENT': return 'default';
+      case 'CLIENT': return 'secondary';
       default: return 'outline';
     }
   };
@@ -158,8 +152,7 @@ export const UserManagement: React.FC = () => {
   const filteredUsers = users.filter(user => {
     const matchesSearch = 
       user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      `${user.first_name} ${user.last_name}`.toLowerCase().includes(searchTerm.toLowerCase());
+      `${user.firstName} ${user.lastName}`.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesRole = roleFilter === 'all' || user.role === roleFilter;
     
@@ -198,30 +191,21 @@ export const UserManagement: React.FC = () => {
                         placeholder="email@exemple.com"
                       />
                     </div>
-                    <div>
-                      <Label htmlFor="username">Nom d'utilisateur</Label>
-                      <Input
-                        id="username"
-                        value={newUser.username}
-                        onChange={(e) => setNewUser({...newUser, username: e.target.value})}
-                        placeholder="nom_utilisateur"
-                      />
-                    </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor="first_name">Prénom</Label>
+                        <Label htmlFor="firstName">Prénom</Label>
                         <Input
-                          id="first_name"
-                          value={newUser.first_name}
-                          onChange={(e) => setNewUser({...newUser, first_name: e.target.value})}
+                          id="firstName"
+                          value={newUser.firstName}
+                          onChange={(e) => setNewUser({...newUser, firstName: e.target.value})}
                         />
                       </div>
                       <div>
-                        <Label htmlFor="last_name">Nom</Label>
+                        <Label htmlFor="lastName">Nom</Label>
                         <Input
-                          id="last_name"
-                          value={newUser.last_name}
-                          onChange={(e) => setNewUser({...newUser, last_name: e.target.value})}
+                          id="lastName"
+                          value={newUser.lastName}
+                          onChange={(e) => setNewUser({...newUser, lastName: e.target.value})}
                         />
                       </div>
                     </div>
@@ -232,9 +216,9 @@ export const UserManagement: React.FC = () => {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="client">Client</SelectItem>
-                          <SelectItem value="agent">Agent</SelectItem>
-                          <SelectItem value="admin">Administrateur</SelectItem>
+                          <SelectItem value="CLIENT">Client</SelectItem>
+                          <SelectItem value="AGENT">Agent</SelectItem>
+                          <SelectItem value="ADMIN">Administrateur</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -259,7 +243,7 @@ export const UserManagement: React.FC = () => {
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Rechercher par email, nom d'utilisateur..."
+                  placeholder="Rechercher par email, nom..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -272,9 +256,9 @@ export const UserManagement: React.FC = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Tous les rôles</SelectItem>
-                <SelectItem value="admin">Administrateurs</SelectItem>
-                <SelectItem value="agent">Agents</SelectItem>
-                <SelectItem value="client">Clients</SelectItem>
+                <SelectItem value="ADMIN">Administrateurs</SelectItem>
+                <SelectItem value="AGENT">Agents</SelectItem>
+                <SelectItem value="CLIENT">Clients</SelectItem>
               </SelectContent>
             </Select>
             <Button variant="outline" onClick={loadUsers} disabled={loading}>
@@ -313,8 +297,8 @@ export const UserManagement: React.FC = () => {
                     <TableRow key={user.id}>
                       <TableCell>
                         <div>
-                          <div className="font-medium">{user.first_name} {user.last_name}</div>
-                          <div className="text-sm text-muted-foreground">@{user.username}</div>
+                          <div className="font-medium">{user.firstName} {user.lastName}</div>
+                          <div className="text-sm text-muted-foreground">{user.email}</div>
                         </div>
                       </TableCell>
                       <TableCell>{user.email}</TableCell>
@@ -324,8 +308,8 @@ export const UserManagement: React.FC = () => {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge variant={user.is_active ? 'default' : 'secondary'}>
-                          {user.is_active ? (
+                        <Badge variant={user.status === 'ACTIVE' ? 'default' : 'secondary'}>
+                          {user.status === 'ACTIVE' ? (
                             <>
                               <UserCheck className="h-3 w-3 mr-1" />
                               Actif
@@ -339,8 +323,8 @@ export const UserManagement: React.FC = () => {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        {user.last_login 
-                          ? new Date(user.last_login).toLocaleDateString()
+                        {user.lastLogin 
+                          ? new Date(user.lastLogin).toLocaleDateString()
                           : 'Jamais'
                         }
                       </TableCell>
@@ -398,29 +382,21 @@ export const UserManagement: React.FC = () => {
                   onChange={(e) => setSelectedUser({...selectedUser, email: e.target.value})}
                 />
               </div>
-              <div>
-                <Label htmlFor="edit_username">Nom d'utilisateur</Label>
-                <Input
-                  id="edit_username"
-                  value={selectedUser.username}
-                  onChange={(e) => setSelectedUser({...selectedUser, username: e.target.value})}
-                />
-              </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="edit_first_name">Prénom</Label>
+                  <Label htmlFor="edit_firstName">Prénom</Label>
                   <Input
-                    id="edit_first_name"
-                    value={selectedUser.first_name}
-                    onChange={(e) => setSelectedUser({...selectedUser, first_name: e.target.value})}
+                    id="edit_firstName"
+                    value={selectedUser.firstName}
+                    onChange={(e) => setSelectedUser({...selectedUser, firstName: e.target.value})}
                   />
                 </div>
                 <div>
-                  <Label htmlFor="edit_last_name">Nom</Label>
+                  <Label htmlFor="edit_lastName">Nom</Label>
                   <Input
-                    id="edit_last_name"
-                    value={selectedUser.last_name}
-                    onChange={(e) => setSelectedUser({...selectedUser, last_name: e.target.value})}
+                    id="edit_lastName"
+                    value={selectedUser.lastName}
+                    onChange={(e) => setSelectedUser({...selectedUser, lastName: e.target.value})}
                   />
                 </div>
               </div>
@@ -434,9 +410,9 @@ export const UserManagement: React.FC = () => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="client">Client</SelectItem>
-                    <SelectItem value="agent">Agent</SelectItem>
-                    <SelectItem value="admin">Administrateur</SelectItem>
+                    <SelectItem value="CLIENT">Client</SelectItem>
+                    <SelectItem value="AGENT">Agent</SelectItem>
+                    <SelectItem value="ADMIN">Administrateur</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

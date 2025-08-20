@@ -59,7 +59,7 @@ export const ClientDetails: React.FC = () => {
   );
 
   const { data: auditLogs, loading: logsLoading } = useApi(
-    () => finalClientId ? adminService.getAuditLogs({ user_id: finalClientId }).then(res => res || { logs: [] }) : Promise.resolve({ logs: [] }),
+    () => finalClientId ? adminService.getAuditLogs(finalClientId).then(res => res || { logs: [] }) : Promise.resolve({ logs: [] }),
     [finalClientId]
   );
 
@@ -196,7 +196,7 @@ export const ClientDetails: React.FC = () => {
     }
   };
 
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = user?.role === 'ADMIN';
 
   if (isEditMode && clientToEdit) {
     return (

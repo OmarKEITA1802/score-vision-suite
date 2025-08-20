@@ -51,16 +51,11 @@ export const AdminDashboard: React.FC = () => {
       const startDate = new Date();
       startDate.setMonth(endDate.getMonth() - 1); // Dernier mois
       
-      const result = await adminService.generateComplianceReport({
-        start_date: startDate.toISOString().split('T')[0],
-        end_date: endDate.toISOString().split('T')[0],
-        include_decisions: true,
-        include_manual_overrides: true
-      });
+      const result = await adminService.generateComplianceReport();
       
       // Simuler le téléchargement du rapport
       const link = document.createElement('a');
-      link.href = result.download_url || '#';
+      link.href = result.reportUrl || '#';
       link.download = `rapport-conformite-${endDate.toISOString().split('T')[0]}.pdf`;
       document.body.appendChild(link);
       link.click();

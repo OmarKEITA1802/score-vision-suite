@@ -33,7 +33,10 @@ export interface SystemStats {
   successRate: number;
   averageScore: number;
   serverHealth: 'GOOD' | 'WARNING' | 'CRITICAL';
-  dailyVolume: number;
+  dailyVolume: Array<{
+    date: string;
+    count: number;
+  }>;
   modelAccuracy: number;
 }
 

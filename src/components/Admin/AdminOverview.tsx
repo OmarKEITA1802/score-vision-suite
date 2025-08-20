@@ -35,7 +35,7 @@ export const AdminOverview: React.FC = () => {
   const loadStats = async () => {
     try {
       setLoading(true);
-      const response = await adminService.getSystemStats(period);
+      const response = await adminService.getSystemStats();
       setStats(response);
     } catch (error: any) {
       toast({
@@ -76,25 +76,25 @@ export const AdminOverview: React.FC = () => {
   }
 
   // Données pour les graphiques
-  const approvalRate = stats.total_applications > 0 
-    ? Math.round((stats.approved_applications / stats.total_applications) * 100)
+  const approvalRate = stats.totalApplications > 0 
+    ? Math.round((stats.approvedApplications / stats.totalApplications) * 100)
     : 0;
 
-  const rejectionRate = stats.total_applications > 0
-    ? Math.round((stats.rejected_applications / stats.total_applications) * 100)
+  const rejectionRate = stats.totalApplications > 0
+    ? Math.round((stats.rejectedApplications / stats.totalApplications) * 100)
     : 0;
 
-  const pendingRate = stats.total_applications > 0
-    ? Math.round((stats.pending_applications / stats.total_applications) * 100)
+  const pendingRate = stats.totalApplications > 0
+    ? Math.round((stats.pendingApplications / stats.totalApplications) * 100)
     : 0;
 
   const pieData = [
-    { name: 'Approuvées', value: stats.approved_applications, color: '#10b981' },
-    { name: 'Refusées', value: stats.rejected_applications, color: '#ef4444' },
-    { name: 'En attente', value: stats.pending_applications, color: '#f59e0b' },
+    { name: 'Approuvées', value: stats.approvedApplications, color: '#10b981' },
+    { name: 'Refusées', value: stats.rejectedApplications, color: '#ef4444' },
+    { name: 'En attente', value: stats.pendingApplications, color: '#f59e0b' },
   ];
 
-  const dailyVolumeData = stats.daily_volume.map(item => ({
+  const dailyVolumeData = stats.dailyVolume.map(item => ({
     date: new Date(item.date).toLocaleDateString('fr-FR', { 
       month: 'short', 
       day: 'numeric' 
@@ -142,7 +142,7 @@ export const AdminOverview: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total demandes</p>
-                <p className="text-3xl font-bold">{stats.total_applications.toLocaleString()}</p>
+                <p className="text-3xl font-bold">{stats.totalApplications.toLocaleString()}</p>
                 <p className="text-xs text-muted-foreground mt-1">
                   Toutes périodes confondues
                 </p>
@@ -173,9 +173,9 @@ export const AdminOverview: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Utilisateurs actifs</p>
-                <p className="text-3xl font-bold">{stats.active_users}</p>
+                <p className="text-3xl font-bold">{stats.activeUsers}</p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Sur {stats.total_users} total
+                  Sur {stats.totalUsers} total
                 </p>
               </div>
               <Users className="h-8 w-8 text-blue-600" />
@@ -188,7 +188,7 @@ export const AdminOverview: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Précision du modèle</p>
-                <p className="text-3xl font-bold text-purple-600">{Math.round(stats.model_accuracy * 100)}%</p>
+                <p className="text-3xl font-bold text-purple-600">{Math.round(stats.modelAccuracy * 100)}%</p>
                 <div className="flex items-center mt-1">
                   <Brain className="h-3 w-3 text-purple-600 mr-1" />
                   <span className="text-xs text-purple-600">Modèle v2.1 actif</span>
@@ -263,17 +263,17 @@ export const AdminOverview: React.FC = () => {
             <div className="grid grid-cols-3 gap-4 mt-4">
               <div className="text-center">
                 <div className="w-3 h-3 bg-green-500 rounded-full mx-auto mb-1"></div>
-                <p className="text-sm font-medium">{stats.approved_applications}</p>
+                <p className="text-sm font-medium">{stats.approvedApplications}</p>
                 <p className="text-xs text-muted-foreground">Approuvées</p>
               </div>
               <div className="text-center">
                 <div className="w-3 h-3 bg-red-500 rounded-full mx-auto mb-1"></div>
-                <p className="text-sm font-medium">{stats.rejected_applications}</p>
+                <p className="text-sm font-medium">{stats.rejectedApplications}</p>
                 <p className="text-xs text-muted-foreground">Refusées</p>
               </div>
               <div className="text-center">
                 <div className="w-3 h-3 bg-yellow-500 rounded-full mx-auto mb-1"></div>
-                <p className="text-sm font-medium">{stats.pending_applications}</p>
+                <p className="text-sm font-medium">{stats.pendingApplications}</p>
                 <p className="text-xs text-muted-foreground">En attente</p>
               </div>
             </div>
@@ -298,11 +298,11 @@ export const AdminOverview: React.FC = () => {
                   <span className="text-sm font-medium">Demandes en attente</span>
                 </div>
                 <Badge variant="outline" className="text-yellow-600">
-                  {stats.pending_applications}
+                  {stats.pendingApplications}
                 </Badge>
               </div>
               
-              {stats.pending_applications > 10 && (
+              {stats.pendingApplications > 10 && (
                 <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg border border-red-200">
                   <div className="flex items-center space-x-2">
                     <AlertTriangle className="h-4 w-4 text-red-600" />
@@ -314,7 +314,7 @@ export const AdminOverview: React.FC = () => {
                 </div>
               )}
 
-              {stats.model_accuracy < 0.8 && (
+              {stats.modelAccuracy < 0.8 && (
                 <div className="flex items-center justify-between p-3 bg-orange-50 rounded-lg border border-orange-200">
                   <div className="flex items-center space-x-2">
                     <Brain className="h-4 w-4 text-orange-600" />
