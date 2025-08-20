@@ -53,7 +53,7 @@ export const RegisterForm: React.FC = () => {
         lastName: formData.lastName,
         email: formData.email,
         password: formData.password,
-        role: formData.role,
+        role: formData.role.toUpperCase() as 'CLIENT' | 'AGENT',
       });
       
       toast({

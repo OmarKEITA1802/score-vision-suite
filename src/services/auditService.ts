@@ -1,3 +1,5 @@
+import { apiService } from './api';
+
 export interface AuditLog {
   id: string;
   userId: string;
@@ -25,8 +27,7 @@ export type AuditAction =
   | 'modify_application';
 
 class AuditService {
-  private logs: AuditLog[] = [];
-
+  // Enregistrer une action - connectez à votre API
   async logAction(
     userId: string,
     userName: string, 
@@ -34,57 +35,37 @@ class AuditService {
     applicationId: string,
     details: Record<string, any> = {}
   ): Promise<void> {
-    const logEntry: AuditLog = {
-      id: crypto.randomUUID(),
+    await apiService.post('/audit/log', {
       userId,
       userName,
       action,
       applicationId,
-      details,
-      timestamp: new Date(),
-      ipAddress: await this.getClientIP()
-    };
-
-    this.logs.push(logEntry);
-    
-    // En production, ceci sauvegarderait dans Supabase
-    console.log('Audit Log:', logEntry);
-    
-    // Simulation d'un appel API
-    await new Promise(resolve => setTimeout(resolve, 100));
+      details
+    });
   }
 
+  // Récupérer les logs d'une application
   async getApplicationLogs(applicationId: string): Promise<AuditLog[]> {
-    return this.logs.filter(log => log.applicationId === applicationId);
+    return apiService.get<AuditLog[]>(`/audit/applications/${applicationId}`);
   }
 
+  // Récupérer les logs d'un utilisateur
   async getUserLogs(userId: string, limit: number = 50): Promise<AuditLog[]> {
-    return this.logs
-      .filter(log => log.userId === userId)
-      .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
-      .slice(0, limit);
+    return apiService.get<AuditLog[]>(`/audit/users/${userId}`, { limit });
   }
 
-  private async getClientIP(): Promise<string> {
-    // En production, récupérer la vraie IP
-    return '127.0.0.1';
-  }
-
-  // Méthodes de vérification pour la compliance
+  // Vérifier les permissions d'action
   async verifyActionPermission(
     userId: string, 
     action: AuditAction, 
     applicationId: string
   ): Promise<boolean> {
-    // Vérifications de sécurité et permissions
-    const recentActions = await this.getUserLogs(userId, 10);
-    
-    // Exemples de vérifications :
-    // - Limite du nombre d'actions par heure
-    // - Vérification des permissions spécifiques
-    // - Détection d'activité suspecte
-    
-    return true; // Simplifié pour la démo
+    const response = await apiService.post<{ allowed: boolean }>('/audit/verify-permission', {
+      userId,
+      action,
+      applicationId
+    });
+    return response.allowed;
   }
 }
 

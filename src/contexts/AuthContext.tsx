@@ -6,9 +6,11 @@ export interface User {
   email: string;
   firstName: string;
   lastName: string;
-  role: 'admin' | 'agent' | 'client';
+  role: 'CLIENT' | 'AGENT' | 'ADMIN';
   avatar?: string;
   createdAt: string;
+  status: 'ACTIVE' | 'INACTIVE';
+  lastLogin?: string;
 }
 
 interface AuthContextType {
@@ -26,7 +28,7 @@ interface RegisterData {
   password: string;
   firstName: string;
   lastName: string;
-  role?: 'client' | 'agent';
+  role: 'CLIENT' | 'AGENT';
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);

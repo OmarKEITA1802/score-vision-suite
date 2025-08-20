@@ -1,59 +1,40 @@
 import { apiService } from './api';
+import { User } from './authService';
 
-// Types pour l'administration
-export interface User {
-  id: string;
-  email: string;
-  username: string;
-  first_name: string;
-  last_name: string;
-  role: 'admin' | 'agent' | 'client';
-  is_active: boolean;
-  date_joined: string;
-  last_login?: string;
-}
+export type { User } from './authService';
 
 export interface MLModel {
   id: string;
   name: string;
   version: string;
-  file_path: string;
-  is_active: boolean;
-  performance_metrics: {
-    roc_auc: number;
-    precision: number;
-    recall: number;
-    f1_score: number;
-  };
-  decision_threshold: number;
-  created_at: string;
-  updated_at: string;
+  status: 'ACTIVE' | 'INACTIVE' | 'TRAINING';
+  accuracy: number;
+  createdAt: string;
+  lastUsed?: string;
 }
 
 export interface AuditLog {
   id: string;
-  user_id: string;
-  user_email: string;
+  userId: string;
+  userName: string;
   action: string;
-  resource_type: string;
-  resource_id: string;
-  details: any;
+  details: Record<string, any>;
   timestamp: string;
-  ip_address: string;
+  ipAddress?: string;
 }
 
 export interface SystemStats {
-  total_applications: number;
-  approved_applications: number;
-  rejected_applications: number;
-  pending_applications: number;
-  total_users: number;
-  active_users: number;
-  model_accuracy: number;
-  daily_volume: Array<{
-    date: string;
-    count: number;
-  }>;
+  totalUsers: number;
+  activeUsers: number;
+  totalApplications: number;
+  approvedApplications: number;
+  rejectedApplications: number;
+  pendingApplications: number;
+  successRate: number;
+  averageScore: number;
+  serverHealth: 'GOOD' | 'WARNING' | 'CRITICAL';
+  dailyVolume: number;
+  modelAccuracy: number;
 }
 
 export interface EmailTemplate {
@@ -61,220 +42,104 @@ export interface EmailTemplate {
   name: string;
   subject: string;
   body: string;
-  variables: string[];
-  is_default: boolean;
-  template_type: 'approval' | 'rejection' | 'request_info' | 'appointment';
-  created_at: string;
+  type: 'APPROVAL' | 'REJECTION' | 'REMINDER';
+  isActive: boolean;
 }
 
 class AdminService {
-  // ==================== GESTION UTILISATEURS ====================
-  
-  async getUsers(params?: {
-    page?: number;
-    limit?: number;
-    role?: string;
-    search?: string;
-  }): Promise<{ users: User[]; total: number }> {
-    return apiService.get('/admin/users/', params);
+  // Gestion des utilisateurs
+  async getUsers(searchTerm?: string, roleFilter?: string): Promise<User[]> {
+    return apiService.get<User[]>('/admin/users', { searchTerm, roleFilter });
   }
 
-  async createUser(userData: Partial<User>): Promise<User> {
-    return apiService.post('/admin/users/', userData);
+  async createUser(userData: Omit<User, 'id' | 'createdAt'>): Promise<User> {
+    return apiService.post<User>('/admin/users', userData);
   }
 
-  async updateUser(userId: string, userData: Partial<User>): Promise<User> {
-    return apiService.put(`/admin/users/${userId}/`, userData);
+  async updateUser(userId: string, updates: Partial<User>): Promise<User> {
+    return apiService.put<User>(`/admin/users/${userId}`, updates);
   }
 
   async deleteUser(userId: string): Promise<void> {
-    return apiService.delete(`/admin/users/${userId}/`);
+    await apiService.delete(`/admin/users/${userId}`);
   }
 
-  async resetUserPassword(userId: string): Promise<{ message: string }> {
-    return apiService.post(`/admin/users/${userId}/reset-password/`);
+  async resetUserPassword(userId: string): Promise<void> {
+    await apiService.post(`/admin/users/${userId}/reset-password`);
   }
 
-  async getUserLoginHistory(userId: string): Promise<Array<{
-    timestamp: string;
-    ip_address: string;
-    user_agent: string;
-  }>> {
-    return apiService.get(`/admin/users/${userId}/login-history/`);
-  }
-
-  // ==================== GESTION MODÈLES ML ====================
-  
+  // Modèles ML
   async getModels(): Promise<MLModel[]> {
-    return apiService.get('/admin/ml-models/');
+    return apiService.get<MLModel[]>('/admin/models');
   }
 
-  async uploadModel(file: File, metadata: {
-    name: string;
-    version: string;
-    decision_threshold: number;
-  }): Promise<MLModel> {
-    const formData = new FormData();
-    formData.append('model_file', file);
-    formData.append('metadata', JSON.stringify(metadata));
-    
-    return apiService.uploadFile('/admin/ml-models/', file);
+  async uploadModel(file: File): Promise<MLModel> {
+    return apiService.uploadFile<MLModel>('/admin/models/upload', file);
   }
 
-  async activateModel(modelId: string): Promise<{ message: string }> {
-    return apiService.post(`/admin/ml-models/${modelId}/activate/`);
+  async activateModel(modelId: string): Promise<void> {
+    await apiService.post(`/admin/models/${modelId}/activate`);
   }
 
-  async deactivateModel(modelId: string): Promise<{ message: string }> {
-    return apiService.post(`/admin/ml-models/${modelId}/deactivate/`);
+  async deactivateModel(modelId: string): Promise<void> {
+    await apiService.post(`/admin/models/${modelId}/deactivate`);
   }
 
   async deleteModel(modelId: string): Promise<void> {
-    return apiService.delete(`/admin/ml-models/${modelId}/`);
+    await apiService.delete(`/admin/models/${modelId}`);
   }
 
-  async getModelPerformance(modelId: string): Promise<{
-    confusion_matrix: number[][];
-    roc_curve_data: Array<{ fpr: number; tpr: number }>;
-    feature_importance: Array<{ feature: string; importance: number }>;
+  // Statistiques système
+  async getSystemStats(): Promise<SystemStats> {
+    return apiService.get<SystemStats>('/admin/stats');
+  }
+
+  // Logs d'audit
+  async getAuditLogs(userId?: string, page: number = 1, limit: number = 50): Promise<{
+    logs: AuditLog[];
+    total: number;
+    page: number;
+    totalPages: number;
   }> {
-    return apiService.get(`/admin/ml-models/${modelId}/performance/`);
+    return apiService.get('/admin/audit-logs', { userId, page, limit });
   }
 
-  async reEvaluateAllApplications(modelId: string): Promise<{
-    task_id: string;
-    message: string;
-  }> {
-    return apiService.post(`/admin/ml-models/${modelId}/re-evaluate-all/`);
+  // Génération de rapports
+  async generateComplianceReport(): Promise<{ reportUrl: string }> {
+    return apiService.post<{ reportUrl: string }>('/admin/compliance-report');
   }
 
-  // ==================== STATISTIQUES & MONITORING ====================
-  
-  async getSystemStats(period?: '7d' | '30d' | '90d'): Promise<SystemStats> {
-    return apiService.get('/admin/stats/', { period });
-  }
-
-  async getAuditLogs(params?: {
-    page?: number;
-    limit?: number;
-    user_id?: string;
-    action?: string;
-    start_date?: string;
-    end_date?: string;
-  }): Promise<{ logs: AuditLog[]; total: number }> {
-    return apiService.get('/admin/audit-logs/', params);
-  }
-
-  async exportAuditLogs(params: {
-    start_date: string;
-    end_date: string;
-    format: 'csv' | 'xlsx';
-  }): Promise<Blob> {
-    const response = await apiService.client.get('/admin/audit-logs/export/', {
-      params,
-      responseType: 'blob'
-    });
-    return response.data;
-  }
-
-  // ==================== TEMPLATES & COMMUNICATIONS ====================
-  
+  // Templates d'email
   async getEmailTemplates(): Promise<EmailTemplate[]> {
-    return apiService.get('/admin/email-templates/');
+    return apiService.get<EmailTemplate[]>('/admin/email-templates');
   }
 
-  async createEmailTemplate(template: Omit<EmailTemplate, 'id' | 'created_at'>): Promise<EmailTemplate> {
-    return apiService.post('/admin/email-templates/', template);
+  async createEmailTemplate(template: Omit<EmailTemplate, 'id'>): Promise<EmailTemplate> {
+    return apiService.post<EmailTemplate>('/admin/email-templates', template);
   }
 
-  async updateEmailTemplate(templateId: string, template: Partial<EmailTemplate>): Promise<EmailTemplate> {
-    return apiService.put(`/admin/email-templates/${templateId}/`, template);
+  async updateEmailTemplate(templateId: string, updates: Partial<EmailTemplate>): Promise<EmailTemplate> {
+    return apiService.put<EmailTemplate>(`/admin/email-templates/${templateId}`, updates);
   }
 
   async deleteEmailTemplate(templateId: string): Promise<void> {
-    return apiService.delete(`/admin/email-templates/${templateId}/`);
+    await apiService.delete(`/admin/email-templates/${templateId}`);
   }
 
-  async previewEmailTemplate(templateId: string, variables: Record<string, any>): Promise<{
-    subject: string;
-    body: string;
-  }> {
-    return apiService.post(`/admin/email-templates/${templateId}/preview/`, { variables });
-  }
-
-  // ==================== CONFORMITÉ & RGPD ====================
-  
-  async exportUserData(userId: string): Promise<Blob> {
-    const response = await apiService.client.get(`/admin/users/${userId}/export-data/`, {
-      responseType: 'blob'
-    });
-    return response.data;
-  }
-
-  async getShapExplanation(applicationId: string): Promise<{
-    shap_values: number[];
-    features: string[];
-    base_value: number;
-    plot_url: string;
-  }> {
-    return apiService.get(`/admin/applications/${applicationId}/shap-explanation/`);
-  }
-
-  async generateComplianceReport(params: {
-    start_date: string;
-    end_date: string;
-    include_decisions: boolean;
-    include_manual_overrides: boolean;
-  }): Promise<{
-    report_id: string;
-    download_url: string;
-  }> {
-    return apiService.post('/admin/compliance/generate-report/', params);
-  }
-
-  // ==================== MAINTENANCE & SYSTÈME ====================
-  
-  async cleanupOldData(params: {
-    older_than_days: number;
-    include_logs: boolean;
-    include_files: boolean;
-  }): Promise<{
-    deleted_count: number;
-    freed_space_mb: number;
-  }> {
-    return apiService.post('/admin/maintenance/cleanup/', params);
-  }
-
-  async createBackup(): Promise<{
-    backup_id: string;
-    download_url: string;
-    size_mb: number;
-  }> {
-    return apiService.post('/admin/maintenance/backup/');
+  // Maintenance système
+  async createBackup(): Promise<{ success: boolean; backupId: string }> {
+    return apiService.post('/admin/backup');
   }
 
   async getSystemHealth(): Promise<{
-    database_status: 'healthy' | 'warning' | 'error';
-    redis_status: 'healthy' | 'warning' | 'error';
-    disk_usage_percent: number;
-    memory_usage_percent: number;
-    active_connections: number;
+    status: 'HEALTHY' | 'WARNING' | 'CRITICAL';
+    checks: Array<{
+      name: string;
+      status: 'PASS' | 'FAIL';
+      message?: string;
+    }>;
   }> {
-    return apiService.get('/admin/system/health/');
-  }
-
-  // ==================== PARAMÈTRES GLOBAUX ====================
-  
-  async getSystemSettings(): Promise<Record<string, any>> {
-    return apiService.get('/admin/settings/');
-  }
-
-  async updateSystemSettings(settings: Record<string, any>): Promise<Record<string, any>> {
-    return apiService.put('/admin/settings/', settings);
-  }
-
-  async uploadLogo(file: File): Promise<{ logo_url: string }> {
-    return apiService.uploadFile('/admin/settings/logo/', file);
+    return apiService.get('/admin/health');
   }
 }
 

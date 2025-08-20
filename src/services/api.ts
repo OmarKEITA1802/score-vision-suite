@@ -17,7 +17,7 @@ class ApiService {
 
   constructor() {
     this.client = axios.create({
-      baseURL: '/api',  // Utilise un chemin relatif pour l'API
+      baseURL: process.env.REACT_APP_API_URL || 'http://localhost:3001/api', // Votre URL d'API
       timeout: 10000,
       headers: {
         'Content-Type': 'application/json',
@@ -46,7 +46,6 @@ class ApiService {
         };
 
         if (error.response?.status === 401) {
-          // Token expiré ou invalide
           localStorage.removeItem('auth_token');
           window.location.href = '/login';
           customError.message = 'Session expirée, veuillez vous reconnecter';
@@ -85,7 +84,6 @@ class ApiService {
     return response.data.data;
   }
 
-  // Méthodes pour upload de fichiers
   async uploadFile<T>(url: string, file: File, onProgress?: (progress: number) => void): Promise<T> {
     const formData = new FormData();
     formData.append('file', file);
