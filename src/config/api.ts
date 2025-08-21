@@ -1,7 +1,7 @@
 // Configuration des endpoints API
 export const API_CONFIG = {
   // Changez cette URL pour pointer vers votre backend
-  BASE_URL: process.env.REACT_APP_API_URL || 'http://localhost:3001/api',
+  BASE_URL: import.meta.env.VITE_API_URL || 'http://localhost:3001/api',
   
   // Endpoints pour votre API
   ENDPOINTS: {
@@ -55,7 +55,7 @@ export const API_CONFIG = {
 // Instructions pour connecter vos API :
 /*
 1. Changez la variable BASE_URL dans votre fichier .env.local :
-   REACT_APP_API_URL=https://votre-api.com/api
+   VITE_API_URL=https://votre-api.com/api
 
 2. Assurez-vous que votre backend expose les endpoints suivants :
    
